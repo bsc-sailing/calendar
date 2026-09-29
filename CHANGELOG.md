@@ -2,6 +2,10 @@
 
 Version numbers are in `CONFIG.version` in `index.html` and `VERSION` in `sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**.
 
+## 2.14.3 – 30 Sep 2026
+- More top clearance on every screen with a Close button (Race Courses, Race Marks Map, Club Events, GO SAIL, the day-details sheet, the full-size chart) — the previous increase still wasn't enough on some devices.
+- Fixed: event links on the Club Events screen were showing the browser's default blue/purple link colours instead of the app's own colours, especially jarring in dark mode. They now match the rest of the app, with no underline.
+
 ## 2.14.2 – 30 Sep 2026
 - Fixed the real cause of the Close button sitting under the status bar/notch on iPhone: the page was missing `viewport-fit=cover`, so iOS never reported real safe-area values to any dialog — every fallback padding was silently being applied as if there were no notch at all, even on installed standalone app. Also extended the same fix to the day-details sheet, which never had this handling.
 - The three buttons under the title (Race Courses, Race Marks Map, Club Events) now fit on one line on every current phone, rather than wrapping to two.
