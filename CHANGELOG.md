@@ -2,6 +2,12 @@
 
 Version numbers are in `CONFIG.version` in `index.html` and `VERSION` in `sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**.
 
+## 2.14.0 – 29 Sep 2026
+- New **Club Events** screen, alongside Race Courses and Race Marks Map — Open Days, RYA courses, talks, socials and other club events that aren't part of the racing programme. Built from the club's public events feed, refreshed once a day by a scheduled GitHub Action (see README, "Club Events") since the club's site doesn't allow the app to fetch it directly.
+
+## 2.13.1 – 29 Sep 2026
+- Fixed: on iPhone, the top of the "Race Courses" and "Race Marks Map" screen sat too close to the status bar / notch, slightly covering the Close button. It now keeps clear of it, the same way GO SAIL already did.
+
 ## 2.13.0 – 29 Sep 2026
 - The on-screen header now just says "BSC Sailing Calendar" — no year — so nothing in the app needs changing when 2027's data arrives. The browser tab title still shows the year, so it's still easy to tell seasons apart if you have more than one open.
 - Added `.github/CODEOWNERS`, so pull requests need a review from the listed owner before they can be merged (see README).

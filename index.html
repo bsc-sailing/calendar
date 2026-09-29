@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BSC Sailing Calendar app, version 2.13.0 (2026-09-29) -->
+<!-- BSC Sailing Calendar app, version 2.14.0 (2026-09-29) -->
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
@@ -153,7 +153,7 @@ button.day-btn:focus-visible { outline-offset: -3px; }
 dialog#marks { border: 0; padding: 0; background: var(--surface); color: var(--ink); width: min(100%, 640px); max-width: 100%; height: 100%; max-height: 100%; margin: 0 auto; border-radius: 0; }
 @media (min-width: 700px) { dialog#marks { height: 85vh; max-height: 720px; margin: auto; border-radius: 10px; } }
 dialog#marks::backdrop { background: rgba(8, 20, 30, 0.6); }
-.marks-in { display: flex; flex-direction: column; height: 100%; padding: 14px 14px 0; }
+.marks-in { display: flex; flex-direction: column; height: 100%; padding: calc(env(safe-area-inset-top, 14px) + 4px) 14px 0; box-sizing: border-box; }
 .marks-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex: none; }
 .marks-top h2 { font-family: var(--display); font-size: 1.3rem; margin: 0; }
 .marks-tabs .pill { flex: 1; }
@@ -184,6 +184,14 @@ dialog#chartFull::backdrop { background: #000; }
 .side.P { background: var(--buoy-soft); color: var(--buoy); }
 .side.S { background: var(--stbd-soft); color: var(--stbd); }
 .course-empty { color: var(--muted); padding: 20px 4px; }
+.events-note { color: var(--muted); font-size: 0.85rem; margin: 0 0 12px; }
+.events-list { list-style: none; margin: 0; padding: 0; }
+.events-list li { border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; margin: 0 0 10px; background: var(--bg); }
+.event-date { font-family: var(--display); font-weight: 700; color: var(--water); font-size: 0.92rem; }
+.event-title { font-family: var(--display); font-weight: 700; font-size: 1.05rem; margin: 2px 0 4px; }
+.event-excerpt { color: var(--muted); font-size: 0.92rem; margin: 0 0 8px; }
+.event-link { font-size: 0.9rem; }
+.events-seeall { display: block; text-align: center; margin: 4px 0 16px; }
 .course-context { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; background: var(--gold-soft); border: 1px solid var(--gold); border-radius: 6px; padding: 10px 12px; margin: 0 0 12px; font-size: 0.92rem; }
 .course-context[hidden] { display: none; }
 .course-context .pill { padding: 3px 11px; font-size: 0.85rem; }
@@ -299,7 +307,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
 <div class="wrap">
   <div class="brand"><a href="https://blackwatersailingclub.org.uk/" target="_blank" rel="noopener"><img class="logo" src="logo.png" alt="Blackwater Sailing Club" width="56" height="56" onerror="this.hidden=true"></a><h1 id="title">BSC Sailing Calendar</h1></div>
   <p class="sub" id="sub">Races, events, training and tides for every day of the season.</p>
-  <p class="chartlink"><button class="pill" type="button" id="openCourses">Race Courses</button> <button class="pill" type="button" id="openChart">Race Marks Map</button></p>
+  <p class="chartlink"><button class="pill" type="button" id="openCourses">Race Courses</button> <button class="pill" type="button" id="openChart">Race Marks Map</button> <button class="pill" type="button" id="openEvents">Club Events</button></p>
 
   <section class="seasonbar" id="seasonbar" hidden>
     <div class="row-scroll" id="seasons" role="group" aria-label="Season"></div>
@@ -369,6 +377,10 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
       <h3 style="font-family:var(--display);font-size:1rem;margin:20px 0 4px;">Marks</h3>
       <ul class="marklist" id="markList"></ul>
     </div>
+    <div class="marks-pane" id="pane-events" hidden>
+      <p class="events-note" id="eventsNote"></p>
+      <ul class="events-list" id="eventsList"></ul>
+    </div>
     <div class="marks-pane" id="pane-courses" hidden>
       <div class="course-context" id="courseContext" hidden></div>
       <input class="course-search" id="courseSearch" type="search" placeholder="Search by course code or mark name" autocomplete="off">
@@ -404,7 +416,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
    only needs a new programme.csv (same column headings).
 ------------------------------------------------------------------ */
 const CONFIG = {
-  version: "2.13.0", released: "2026-09-29",   // bump both here and in sw.js, and add a line to CHANGELOG.md
+  version: "2.14.0", released: "2026-09-29",   // bump both here and in sw.js, and add a line to CHANGELOG.md
   filePattern: "programme-{year}.csv",  // one file per season: programme-2026.csv, programme-2027.csv, ...
   yearsBack: 1, yearsAhead: 2,          // which years to look for around the current year
   legacyFile: "programme.csv",          // an older single file: used for its own year if no dated file covers it
@@ -416,7 +428,9 @@ const CONFIG = {
   bigTidePercentile: 0.9,
   coursesFile: "courses-2026.csv",
   chartImage: "chart-2026.jpg",     // large-print race marks chart
-  chartImageDate: "March 2026"
+  chartImageDate: "March 2026",
+  eventsFile: "events.json",        // built by .github/workflows/update-events.yml — see README ("Club Events")
+  eventsSource: "https://blackwatersailingclub.org.uk/events"
 };
 
 const $ = id => document.getElementById(id);
@@ -1024,6 +1038,51 @@ $("sail").addEventListener("close", () => {
   if (sailContextDay) { sailContextDay = null; renderCourseContext(); }
 });
 
+let EVENTS = null;
+function fmtEventDate(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return fmtLong.format(new Date(y, m - 1, d));
+}
+function timeAgo(iso) {
+  const then = new Date(iso), mins = Math.round((Date.now() - then.getTime()) / 60000);
+  if (mins < 60) return mins <= 1 ? "just now" : mins + " minutes ago";
+  const hrs = Math.round(mins / 60);
+  if (hrs < 48) return hrs + (hrs === 1 ? " hour ago" : " hours ago");
+  return Math.round(hrs / 24) + " days ago";
+}
+async function loadEvents() {
+  if (EVENTS !== null) return EVENTS;
+  try {
+    const res = await fetch(CONFIG.eventsFile, { cache: "no-cache" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    EVENTS = await res.json();
+  } catch (e) { EVENTS = false; }
+  return EVENTS;
+}
+async function renderEvents() {
+  const note = $("eventsNote"), list = $("eventsList");
+  note.textContent = "Loading…"; list.textContent = "";
+  const data = await loadEvents();
+  const seeAll = () => { const a = el("a", "events-seeall pill", "See all events on the club website"); a.href = CONFIG.eventsSource; a.target = "_blank"; a.rel = "noopener"; return a; };
+  if (!data) {
+    note.textContent = "Couldn't load club events. They need an internet connection the first time.";
+    list.appendChild(seeAll());
+    return;
+  }
+  const today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+  const upcoming = (data.events || []).filter(e => { const [y, m, d] = e.date.split("-").map(Number); return new Date(y, m - 1, d) >= today; });
+  note.textContent = "From the club's public events page" + (data.generated ? " · updated " + timeAgo(data.generated) : "") + ". Not every event here needs registration — check each one.";
+  list.appendChild(seeAll());
+  if (!upcoming.length) { list.appendChild(el("p", "course-empty", "No upcoming events in the feed right now.")); return; }
+  upcoming.forEach(e => {
+    const li = document.createElement("li");
+    li.appendChild(el("div", "event-date", fmtEventDate(e.date) + (e.hasTime ? " · " + e.time : "")));
+    li.appendChild(el("div", "event-title", e.title));
+    if (e.excerpt) li.appendChild(el("p", "event-excerpt", e.excerpt));
+    if (e.link) { const a = el("a", "event-link", "Details" + (e.link.includes("/event-") ? " and registration" : "") + " →"); a.href = e.link; a.target = "_blank"; a.rel = "noopener"; li.appendChild(a); }
+    list.appendChild(li);
+  });
+}
 function renderCourses() {
   const q = $("courseSearch").value.trim().toLowerCase();
   const list = COURSES.filter(c => {
@@ -1085,17 +1144,21 @@ function openChartFull() {
 }
 $("chartBox").addEventListener("click", openChartFull);
 $("chartFull-close").addEventListener("click", () => $("chartFull").close());
+const MARKS_TITLES = { chart: "Race Marks Map", courses: "Race Courses", events: "Club Events" };
 function openMarksDialog(tab) {
   const dlg = $("marks");
-  $("marks-title").textContent = tab === "courses" ? "Race Courses" : "Race Marks Map";
+  $("marks-title").textContent = MARKS_TITLES[tab] || "Race Marks Map";
   $("pane-chart").hidden = tab !== "chart";
   $("pane-courses").hidden = tab !== "courses";
+  $("pane-events").hidden = tab !== "events";
   if (!dlg.open) dlg.showModal();
   document.body.classList.add("lock");
   if (tab === "chart") renderChart();
   if (tab === "courses") renderCourseContext();
+  if (tab === "events") renderEvents();
   loadCourses().then(ok => {
     if (tab === "chart") { if (ok) renderMarkList(); return; }
+    if (tab !== "courses") return;
     if (!ok) { $("courseList").textContent = ""; $("courseList").appendChild(el("p", "course-empty", "The course cards couldn't be loaded. They need an internet connection the first time.")); return; }
     buildWindGrid(); renderMarkList(); renderCourses();
   });
@@ -1109,6 +1172,7 @@ function renderCourseContext() {
   box.appendChild(pillBtn("Cancel", () => { sailContextDay = null; renderCourseContext(); }));
 }
 $("openChart").addEventListener("click", () => openMarksDialog("chart"));
+$("openEvents").addEventListener("click", () => openMarksDialog("events"));
 $("openCourses").addEventListener("click", () => { sailContextDay = null; openMarksDialog("courses"); });
 $("sheet-gosail").addEventListener("click", () => {
   sailContextDay = nav[navIdx];
