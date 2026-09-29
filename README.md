@@ -22,6 +22,8 @@ This is an unofficial version made from the printed programme. Check the club we
 - **Start TBC** means the coach or instructor sets the start time.
 - **≈** before a time or height means the tide isn't printed in the programme and is estimated.
 - **Season buttons** (2026, 2027 and so on) appear at the top when there is more than one season. The app opens on the current season and moves to the next one automatically once the current one has finished.
+- **Grand Prix weekend** dates carry a gold badge, on the day list and in the day details.
+- **GO SAIL** — see its own section below.
 
 ## Use it as a website, or save it as an app
 
@@ -35,16 +37,40 @@ This is an unofficial version made from the printed programme. Check the club we
 
 The forecast needs an internet connection either way. If you see an old icon or name, remove the shortcut and add it again.
 
-## Chart and course cards
+## Contributing
+
+Changes go through a pull request, reviewed against `.github/CODEOWNERS`. To set this up on a repo (or check it's still in place):
+
+1. **Repo → Settings → Rulesets → New branch ruleset.** Target `main`.
+2. Turn on **Require a pull request before merging**, set **Required approvals: 1**, and turn on **Require review from Code Owners**.
+3. Leave **"Do not allow bypassing the above settings"** off. This is what lets the code owner keep pushing routine updates straight to `main` (or merge their own PRs) without needing anyone else's sign-off — Organization Owners and repo Admins can bypass the rule, everyone else can't.
+
+Worth knowing: GitHub never lets anyone approve their own pull request, code owner or not. So if the code owner is also the one opening PRs (the usual case here), that's exactly why step 3 matters — without it, the code owner would be the only person allowed to approve, yet unable to approve their own work, and stuck. Anyone who isn't a bypass-eligible Admin has no such workaround: their PRs always need the code owner's approval.
+
+## Chart, course cards and GO SAIL
 
 Tap **Race Courses** or **Race Marks Map** near the top of the app — each opens its own screen.
 
-- **Chart:** shows the club's large-print race marks chart (March 2026). A plain list of mark names sits below it.
-- **Course cards:** all the club's printed courses, one card per wind direction and length. Filter by wind direction, or search by course code (for example `A3`) or a mark name. Each card expands to show its marks in sailing order, with Port or Starboard rounding.
+- **Chart:** the club's large-print race marks chart (March 2026). Tap the chart to open it full size and pinch-zoom in on it. A plain list of mark names sits below the small version.
+- **Course cards:** all the club's printed courses, one card per wind direction and length. Filter by wind direction, or search by course code (for example `A3`) or a mark name. Each card expands to show its marks in sailing order, with a **Port** (red) or **Starboard** (green) badge. Club Line Gate and Finish show no badge, since you sail through a gate rather than round it.
+
+### GO SAIL
+
+A button at the bottom of each expanded course card. It opens a big, high-contrast, always-dark full-screen view of that course, sized to be readable at a glance on deck:
+
+- The course code, the wind direction it's for, and today's forecast wind speed for that direction (when a forecast is available).
+- A compact **START** / **HW** line — today's first start and high water, or "n/a" if there's no club racing that day.
+- Every mark in order, abbreviated (Ballast H, Northey P., CLG), with its Port/Starboard badge on the right. Text size adjusts automatically so the whole course fits the screen with no scrolling, however many marks it has.
+- Tap the chart to open it full size for zooming, the same as from the Race Marks Map screen.
+- Tries to keep the screen awake while open (works on Chrome/Android; Safari doesn't support this, so it will still time out there).
+
+**GO SAIL from a specific day:** open a day's details and tap **GO SAIL** next to **Add to calendar**. You're taken to Race Courses with a banner showing which day you're choosing for — pick a course and GO SAIL shows that day's own Start and HW (with the date shown alongside them, since it may not be today). Opening GO SAIL from the header button, rather than from a day, always uses today's start and tide.
 
 To update either for a new season:
 - **Chart:** replace `chart-2026.jpg` with a new export of the printed chart when it changes.
 - **Course cards:** replace `courses-2026.csv` with the new season's data, keeping the same column headings (`Code, Family, Wind sector, Distance (miles), Order, Mark, Side, Rounding`), and update `CONFIG.coursesFile` if you rename it.
+
+Neither file is year-aware the way the programme data is — a new chart or course-card export needs its filename (and `CONFIG.chartImage` / `CONFIG.coursesFile`) updated by hand, rather than just being uploaded under a new year.
 
 ## Adding a new season (2027 and beyond)
 
@@ -70,7 +96,7 @@ Each row is one date plus one fleet (or one event or training item with no fleet
 | Tide source | `Programme`, or `Estimated` for tides not printed in the programme |
 | Start time | `HH:MM`, `TBC` (set by the coach or instructor), or blank |
 | Fleet | The fleet name, exactly as spelled elsewhere in the file (Fast / Fireball, Medium, Wayfarer, Sprite, Short course, Fridays, Mirror, Cruiser). Blank for events and training. The fleet buttons come from these names, so a new fleet just works |
-| Race start order | 1 to 9, the order fleets start in. Only on racing rows |
+| Race start order | 1 to 6, the order fleets start in. Only on racing rows |
 | Event | A club-wide event (Regatta, Evening race, BJRC Blackwater Cup, Cadet week, Mirror sailing, No racing and so on) |
 | Training | Cadet training, Cadet coaching, Adult RYA, or "[Fleet] training" |
 | GP weekend | `TRUE` on Grand Prix weekend dates, otherwise `FALSE` |
@@ -79,7 +105,7 @@ Each row is one date plus one fleet (or one event or training item with no fleet
 
 An event that covers several fleets has one row per fleet, all with the same Event. Extra columns (such as Issue) are ignored, and the rows can be in any order.
 
-Weekly sessions (Mirror sailing and Beach Club) are named in `CONFIG.weekly` near the top of `index.html`, so they can be switched off with the **Weekly sessions** tick box. If a future season uses different names for these, change that list.
+Weekly sessions (Mirror sailing and Beach Club) are named in `CONFIG.weekly` near the top of `index.html` and always show, the same as any other event. If a future season uses different names for these, change that list.
 
 ## Version and support
 

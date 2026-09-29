@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BSC Sailing Calendar app, version 2.12.1 (2026-09-28) -->
+<!-- BSC Sailing Calendar app, version 2.13.0 (2026-09-29) -->
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
@@ -404,7 +404,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
    only needs a new programme.csv (same column headings).
 ------------------------------------------------------------------ */
 const CONFIG = {
-  version: "2.12.1", released: "2026-09-28",   // bump both here and in sw.js, and add a line to CHANGELOG.md
+  version: "2.13.0", released: "2026-09-29",   // bump both here and in sw.js, and add a line to CHANGELOG.md
   filePattern: "programme-{year}.csv",  // one file per season: programme-2026.csv, programme-2027.csv, ...
   yearsBack: 1, yearsAhead: 2,          // which years to look for around the current year
   legacyFile: "programme.csv",          // an older single file: used for its own year if no dated file covers it
@@ -1299,7 +1299,7 @@ function activateSeason(s) {
   seasonFinished = s.last < today;
   $("hidePast").checked = !seasonFinished;
   state.month = "all"; state.chip = "all"; state.preset = null; $("q").value = "";
-  document.title = CONFIG.name + " " + YEAR; $("title").textContent = CONFIG.name + " " + YEAR;
+  document.title = CONFIG.name + " " + YEAR; $("title").textContent = CONFIG.name;
   $("foot").hidden = false;
   buildSeasonBar(); buildPills(); renderNext(); render(); showChecks(); renderSupport();
 }

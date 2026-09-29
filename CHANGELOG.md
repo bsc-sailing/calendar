@@ -2,6 +2,10 @@
 
 Version numbers are in `CONFIG.version` in `index.html` and `VERSION` in `sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**.
 
+## 2.13.0 – 29 Sep 2026
+- The on-screen header now just says "BSC Sailing Calendar" — no year — so nothing in the app needs changing when 2027's data arrives. The browser tab title still shows the year, so it's still easy to tell seasons apart if you have more than one open.
+- Added `.github/CODEOWNERS`, so pull requests need a review from the listed owner before they can be merged (see README).
+
 ## 2.12.1 – 28 Sep 2026
 - The app now lives in the club's GitHub organisation: https://bsc-sailing.github.io/calendar/ (source: https://github.com/bsc-sailing/calendar). README links updated; no change to how the app works. Anyone who saved the old address to their home screen needs to add the new one.
 
