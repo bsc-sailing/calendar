@@ -3,10 +3,22 @@ name: Update club events
 # Refreshes events.json from the club's public RSS feed. This never touches
 # programme data or the app itself — only that one file.
 #
-# Runs client-side fetching of this feed is blocked by the club's site (no
-# CORS headers), so this Action fetches it server-side instead, on a
-# schedule, and opens a pull request when the content has actually changed.
-# See README.md ("Club Events") for how this fits together.
+# Fetching this feed directly from a visitor's browser is blocked by the
+# club's site (no CORS headers), so this Action fetches it server-side
+# instead, on a schedule, and pushes straight to main if the content
+# changed — no PR, no waiting on a human, every day.
+#
+# That direct push only works because of one specific, deliberate exception
+# to "every change needs a pull request":
+#   Repo -> Settings -> Rules -> Rulesets -> (the ruleset covering main)
+#   -> Bypass list -> add "GitHub Actions" / "Repository admin" as appropriate
+#     for how your ruleset UI presents it.
+# This exempts pushes made by this workflow (and anything else run by
+# GitHub Actions) from the PR requirement. It does NOT exempt changes to the
+# workflow file itself from that same requirement — .github/workflows/*.yml
+# still needs a token with the "workflow" permission to push, and still goes
+# through review like everything else. See README.md ("Club Events") for
+# the full reasoning.
 
 on:
   schedule:
@@ -15,7 +27,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   update-events:
@@ -26,17 +37,14 @@ jobs:
       - name: Fetch and convert the events feed
         run: python3 scripts/update-events.py
 
-      - name: Open a PR if events.json changed
-        uses: peter-evans/create-pull-request@v6
-        with:
-          commit-message: "Update club events (automated)"
-          title: "Update club events"
-          body: |
-            Automated refresh of `events.json` from the club's public events feed:
-            https://blackwatersailingclub.org.uk/events
-
-            This only changes that one file. Merging republishes the site within a
-            couple of minutes, same as any other change to `main`.
-          branch: auto/update-events
-          delete-branch: true
-          add-paths: events.json
+      - name: Commit and push if events.json changed
+        run: |
+          if git diff --quiet -- events.json; then
+            echo "No change to events.json — nothing to push."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add events.json
+          git commit -m "Update club events (automated)"
+          git push

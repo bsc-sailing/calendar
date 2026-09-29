@@ -73,6 +73,15 @@ def main():
     src = sys.argv[1] if len(sys.argv) > 1 else None  # allow a local file for testing
     xml_bytes = open(src, "rb").read() if src else fetch(FEED_URL)
     events = parse(xml_bytes)
+
+    if not events:
+        # A feed outage or a change to the club's page structure shouldn't
+        # silently wipe what's already shown in the app — leave the existing
+        # file alone and flag it loudly in the Action's log instead.
+        print("::warning::Parsed 0 events from the feed — leaving events.json unchanged. "
+              "Check the feed URL and scripts/update-events.py still match the feed's shape.")
+        sys.exit(0)
+
     out = {
         "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "source": "https://blackwatersailingclub.org.uk/events",

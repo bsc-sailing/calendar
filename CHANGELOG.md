@@ -2,6 +2,13 @@
 
 Version numbers are in `CONFIG.version` in `index.html` and `VERSION` in `sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**.
 
+## 2.14.2 – 30 Sep 2026
+- Fixed the real cause of the Close button sitting under the status bar/notch on iPhone: the page was missing `viewport-fit=cover`, so iOS never reported real safe-area values to any dialog — every fallback padding was silently being applied as if there were no notch at all, even on installed standalone app. Also extended the same fix to the day-details sheet, which never had this handling.
+- The three buttons under the title (Race Courses, Race Marks Map, Club Events) now fit on one line on every current phone, rather than wrapping to two.
+
+## 2.14.1 – 29 Sep 2026
+- Club Events now updates itself with no PR to approve: the workflow pushes straight to `main` once GitHub Actions is added to the ruleset's bypass list (see README). Added a safeguard so a broken or empty feed leaves `events.json` alone instead of wiping the list.
+
 ## 2.14.0 – 29 Sep 2026
 - New **Club Events** screen, alongside Race Courses and Race Marks Map — Open Days, RYA courses, talks, socials and other club events that aren't part of the racing programme. Built from the club's public events feed, refreshed once a day by a scheduled GitHub Action (see README, "Club Events") since the club's site doesn't allow the app to fetch it directly.
 

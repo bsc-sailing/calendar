@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- BSC Sailing Calendar app, version 2.14.0 (2026-09-29) -->
+<!-- BSC Sailing Calendar app, version 2.14.2 (2026-09-30) -->
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>BSC Sailing Calendar</title>
 <meta name="theme-color" content="#0E2231">
 <meta name="application-name" content="BSC Calendar">
@@ -149,11 +149,12 @@ button.day-btn:focus-visible { outline-offset: -3px; }
 .gauge { display: block; height: 7px; margin: 5px 0 3px auto; width: 100%; background: var(--line); border-radius: 2px; overflow: hidden; }
 .gauge i { display: block; height: 100%; background: var(--water); }
 .empty { padding: 32px 8px; text-align: center; color: var(--muted); }
-.chartlink { margin: 0 0 14px; }
+.chartlink { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 14px; }
+.navlink { font-size: 0.76rem; padding: 6px 8px; white-space: nowrap; }
 dialog#marks { border: 0; padding: 0; background: var(--surface); color: var(--ink); width: min(100%, 640px); max-width: 100%; height: 100%; max-height: 100%; margin: 0 auto; border-radius: 0; }
 @media (min-width: 700px) { dialog#marks { height: 85vh; max-height: 720px; margin: auto; border-radius: 10px; } }
 dialog#marks::backdrop { background: rgba(8, 20, 30, 0.6); }
-.marks-in { display: flex; flex-direction: column; height: 100%; padding: calc(env(safe-area-inset-top, 14px) + 4px) 14px 0; box-sizing: border-box; }
+.marks-in { display: flex; flex-direction: column; height: 100%; padding: calc(env(safe-area-inset-top, 14px) + 10px) 14px 0; box-sizing: border-box; }
 .marks-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex: none; }
 .marks-top h2 { font-family: var(--display); font-size: 1.3rem; margin: 0; }
 .marks-tabs .pill { flex: 1; }
@@ -202,7 +203,7 @@ dialog#chartFull::backdrop { background: #000; }
 /* GO SAIL full-screen view: fixed dark, high-contrast, for reading on deck */
 dialog#sail { border: 0; padding: 0; width: 100%; height: 100%; max-width: 100%; max-height: 100%; margin: 0; background: #05131c; color: #fff; }
 dialog#sail::backdrop { background: #05131c; }
-.sail-in { height: 100%; display: flex; flex-direction: column; padding: env(safe-area-inset-top, 14px) 16px calc(env(safe-area-inset-bottom, 12px) + 12px); box-sizing: border-box; }
+.sail-in { height: 100%; display: flex; flex-direction: column; padding: calc(env(safe-area-inset-top, 14px) + 6px) 16px calc(env(safe-area-inset-bottom, 12px) + 12px); box-sizing: border-box; }
 .sail-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
 .sail-code { font-family: var(--display); font-weight: 700; font-size: clamp(1.3rem, 6vw, 1.8rem); line-height: 1; letter-spacing: -0.01em; }
 .sail-meta { color: #9fc3d6; font-size: 0.95rem; margin-top: 3px; }
@@ -240,7 +241,7 @@ dialog#sheet::backdrop { background: rgba(8, 20, 30, 0.6); }
 dialog#sheet[open] { animation: rise 0.18s ease-out; }
 @keyframes rise { from { transform: translateY(28px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { dialog#sheet[open] { animation: none; } }
-.sheet-in { padding: 16px 18px 20px; }
+.sheet-in { padding: calc(env(safe-area-inset-top, 16px) + 4px) 18px calc(env(safe-area-inset-bottom, 20px) + 12px); box-sizing: border-box; }
 .sheet-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
 .sheet-top .pill { flex: none; }
 .firststart { margin: 6px 0 2px; font-size: 1.05rem; }
@@ -307,7 +308,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
 <div class="wrap">
   <div class="brand"><a href="https://blackwatersailingclub.org.uk/" target="_blank" rel="noopener"><img class="logo" src="logo.png" alt="Blackwater Sailing Club" width="56" height="56" onerror="this.hidden=true"></a><h1 id="title">BSC Sailing Calendar</h1></div>
   <p class="sub" id="sub">Races, events, training and tides for every day of the season.</p>
-  <p class="chartlink"><button class="pill" type="button" id="openCourses">Race Courses</button> <button class="pill" type="button" id="openChart">Race Marks Map</button> <button class="pill" type="button" id="openEvents">Club Events</button></p>
+  <div class="chartlink"><button class="pill navlink" type="button" id="openCourses">Race Courses</button><button class="pill navlink" type="button" id="openChart">Race Marks Map</button><button class="pill navlink" type="button" id="openEvents">Club Events</button></div>
 
   <section class="seasonbar" id="seasonbar" hidden>
     <div class="row-scroll" id="seasons" role="group" aria-label="Season"></div>
@@ -416,7 +417,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
    only needs a new programme.csv (same column headings).
 ------------------------------------------------------------------ */
 const CONFIG = {
-  version: "2.14.0", released: "2026-09-29",   // bump both here and in sw.js, and add a line to CHANGELOG.md
+  version: "2.14.2", released: "2026-09-30",   // bump both here and in sw.js, and add a line to CHANGELOG.md
   filePattern: "programme-{year}.csv",  // one file per season: programme-2026.csv, programme-2027.csv, ...
   yearsBack: 1, yearsAhead: 2,          // which years to look for around the current year
   legacyFile: "programme.csv",          // an older single file: used for its own year if no dated file covers it
