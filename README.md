@@ -103,4 +103,3 @@ To release a new version: change `CONFIG.version` and `CONFIG.released` in `inde
 | `courses-2026.csv` | The course cards: one row per mark, grouped into courses. |
 
 Weather data is from [Open-Meteo.com](https://open-meteo.com/).
-test
