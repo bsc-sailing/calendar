@@ -2,6 +2,9 @@
 
 Version numbers are in `CONFIG.version` in `index.html` and `VERSION` in `sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**.
 
+## 2.12.1 – 28 Sep 2026
+- The app now lives in the club's GitHub organisation: https://bsc-sailing.github.io/calendar/ (source: https://github.com/bsc-sailing/calendar). README links updated; no change to how the app works. Anyone who saved the old address to their home screen needs to add the new one.
+
 ## 2.12.0 – 23 Sep 2026
 - GO SAIL: Start and High water are now a single compact "START: 11:30   HW: 13:19" line under the wind, instead of two large boxes — this frees more height for the marks, which now scale slightly larger on long courses.
 - Race Courses list: Port is now red and Starboard green (matching GO SAIL and real buoyage), replacing the earlier blue/orange.

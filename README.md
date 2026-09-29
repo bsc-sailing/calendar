@@ -2,7 +2,9 @@
 
 A phone-friendly sailing calendar for Blackwater Sailing Club (BSC), built from the club's season programme: races by fleet, events, training, high water and a weather forecast for every day.
 
-**Open it here:** https://jfairhead.github.io/bsc-sailing/
+**Open it here:** https://bsc-sailing.github.io/calendar/
+
+Source code and issues: https://github.com/bsc-sailing/calendar
 
 It works as an ordinary website in any browser on a phone, tablet or computer, so there is nothing to install. Bookmark the link if you like. Saving it as an app is optional (see below).
 
@@ -53,7 +55,7 @@ Each season is one file named **`programme-YEAR.csv`**, for example `programme-2
 3. Upload it to this repo (GitHub: **Add file**, then **Upload files**). Leave the earlier seasons in place.
 4. Wait a minute or two, then close and reopen the app. The new season appears as a button, and becomes the default once the previous season has finished.
 
-To check a file before you rely on it, open the app with `?check` on the end of the address (for example `https://jfairhead.github.io/bsc-sailing/?check`). It lists problems such as dates in the wrong format, start times that aren't `HH:MM` or `TBC`, racing rows with no start time, and days with no tide.
+To check a file before you rely on it, open the app with `?check` on the end of the address (for example `https://bsc-sailing.github.io/calendar/?check`). It lists problems such as dates in the wrong format, start times that aren't `HH:MM` or `TBC`, racing rows with no start time, and days with no tide.
 
 If you still have the older single `programme.csv` in the repo it keeps working: it's treated as the season for the year of its dates, unless a `programme-YEAR.csv` covers that year. You can delete it once `programme-2026.csv` is there.
 
