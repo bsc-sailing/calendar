@@ -2,6 +2,17 @@
 
 Version numbers are in `CONFIG.version` in `index.html` and `VERSION` in `sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**.
 
+## 2.15.3 – 1 Oct 2026
+- Reordered the nav buttons: Race Courses, Race Marks Map, Tides & Weather, Club Events — groups the three sailing-data screens together, with Club Events on its own at the end.
+
+## 2.15.2 – 1 Oct 2026
+- Nav buttons (Race Courses, Race Marks Map, Club Events, Tides & Weather) are now equal width and share the exact same look as the filter pills, rather than a smaller custom size.
+- GO SAIL's and the full-size chart's Close buttons now match that same pill style too, instead of a filled dark box.
+- Fixed a likely cause of the stray highlight sometimes seen between adjacent fleet/filter buttons after tapping one on iOS: buttons are now explicitly blurred after a touch tap (never after a keyboard activation, so keyboard focus indication is untouched).
+- Tides & Weather: the cross-reference note no longer says "see details" twice (once in the text, once on the button next to it). The forecast source link no longer shows on a date too far ahead to have a forecast — it was being shown regardless, which made no sense with nothing to attribute.
+- Add to calendar: a racing entry now runs from 1.5 hours before the first start to 3 hours after high water, to allow rigging and de-rigging time, rather than a flat 3 hours from the start. Noted on the main page footer.
+- Support info's "updated" lines for Club Events and the tide reference now say what they actually measure — when the *content* last changed, not when the job last ran. A manually-triggered run that finds nothing new won't move this number, which is correct, if easy to misread as the job not having run at all.
+
 ## 2.15.1 – 1 Oct 2026
 - Support info now shows when Club Events and the tide reference were each last updated — the easiest way to notice either scheduled job has quietly stopped working, without checking GitHub.
 - Nav buttons now wrap their own text onto two lines (e.g. "Race / Courses") instead of the whole row wrapping — all four fit on one line as a result.

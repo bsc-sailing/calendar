@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BSC Sailing Calendar app, version 2.15.1 (2026-10-01) -->
+<!-- BSC Sailing Calendar app, version 2.15.3 (2026-10-01) -->
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
@@ -62,7 +62,8 @@ h1 { font-family: var(--display); font-weight: 700; font-size: clamp(1.7rem, 7vw
 p { margin: 0; }
 :focus-visible { outline: 3px solid var(--water); outline-offset: 2px; }
 
-.pill { flex: none; font: inherit; font-size: 0.92rem; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 6px 13px; cursor: pointer; }
+.pill { flex: none; font: inherit; font-size: 0.92rem; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 6px 13px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+button { -webkit-tap-highlight-color: transparent; }
 .pill[aria-pressed="true"] { background: var(--water); border-color: var(--water); color: var(--bg); font-weight: 700; }
 .pill:disabled { opacity: 0.4; cursor: default; }
 
@@ -150,7 +151,7 @@ button.day-btn:focus-visible { outline-offset: -3px; }
 .gauge i { display: block; height: 100%; background: var(--water); }
 .empty { padding: 32px 8px; text-align: center; color: var(--muted); }
 .chartlink { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 14px; }
-.navlink { font-size: 0.76rem; padding: 6px 8px; white-space: normal; line-height: 1.2; text-align: center; }
+.navlink { flex: 1 1 0; min-width: 0; white-space: normal; line-height: 1.2; text-align: center; }
 dialog#marks { border: 0; padding: 0; background: var(--surface); color: var(--ink); width: min(100%, 640px); max-width: 100%; height: 100%; max-height: 100%; margin: 0 auto; border-radius: 0; }
 @media (min-width: 700px) { dialog#marks { height: 85vh; max-height: 720px; margin: auto; border-radius: 10px; } }
 dialog#marks::backdrop { background: rgba(8, 20, 30, 0.6); }
@@ -164,7 +165,8 @@ dialog#marks::backdrop { background: rgba(8, 20, 30, 0.6); }
 .chart-box img { display: block; width: 100%; height: 100%; border: 0; object-fit: contain; background: #fff; }
 dialog#chartFull { border: 0; padding: 0; width: 100%; height: 100%; max-width: 100%; max-height: 100%; margin: 0; background: #000; }
 dialog#chartFull::backdrop { background: #000; }
-.chart-full-close { position: fixed; top: calc(env(safe-area-inset-top, 12px) + 12px); right: 12px; z-index: 2; background: #12283a; color: #fff; border: 1px solid #2c4a5c; border-radius: 6px; padding: 8px 14px; font: inherit; }
+.pill-dark { flex: none; font: inherit; font-size: 0.92rem; color: #fff; background: transparent; border: 1px solid #3a5568; border-radius: 999px; padding: 6px 13px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.chart-full-close { position: fixed; top: calc(env(safe-area-inset-top, 12px) + 12px); right: 12px; z-index: 2; }
 .chart-full-scroll { width: 100%; height: 100%; overflow: auto; touch-action: pinch-zoom pan-x pan-y; display: grid; place-items: center; }
 .chart-full-scroll img { display: block; width: 100%; height: auto; }
 .chart-note { color: var(--muted); font-size: 0.85rem; margin: 8px 0 0; }
@@ -233,7 +235,7 @@ dialog#sail::backdrop { background: #05131c; }
 .sail-quick { color: #d8e8ef; font-size: 0.95rem; font-weight: 700; margin-top: 4px; }
 .sail-quick b { color: #fff; }
 .sail-header-row { flex: none; }
-.sail-close { flex: none; background: #12283a; color: #fff; border: 1px solid #2c4a5c; border-radius: 6px; padding: 10px 16px; font: inherit; font-size: 1rem; }
+
 
 .sail-list { list-style: none; margin: 10px 0 0; padding: 0; flex: 1; min-height: 0; overflow-y: auto; font-size: 26px; }
 .sail-list li { display: flex; align-items: center; gap: 0.5em; padding: 0.4em 0; border-bottom: 1px solid #1f3d4f; }
@@ -331,7 +333,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
 <div class="wrap">
   <div class="brand"><a href="https://blackwatersailingclub.org.uk/" target="_blank" rel="noopener"><img class="logo" src="logo.png" alt="Blackwater Sailing Club" width="56" height="56" onerror="this.hidden=true"></a><h1 id="title">BSC Sailing Calendar</h1></div>
   <p class="sub" id="sub">Races, events, training and tides for every day of the season.</p>
-  <div class="chartlink"><button class="pill navlink" type="button" id="openCourses">Race<br>Courses</button><button class="pill navlink" type="button" id="openChart">Race Marks<br>Map</button><button class="pill navlink" type="button" id="openEvents">Club<br>Events</button><button class="pill navlink" type="button" id="openTides">Tides &amp;<br>Weather</button></div>
+  <div class="chartlink"><button class="pill navlink" type="button" id="openCourses">Race<br>Courses</button><button class="pill navlink" type="button" id="openChart">Race Marks<br>Map</button><button class="pill navlink" type="button" id="openTides">Tides &amp;<br>Weather</button><button class="pill navlink" type="button" id="openEvents">Club<br>Events</button></div>
 
   <section class="seasonbar" id="seasonbar" hidden>
     <div class="row-scroll" id="seasons" role="group" aria-label="Season"></div>
@@ -366,7 +368,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
 
   <div class="foot" id="foot" hidden>
     <p>Races are listed by fleet in start order. HW is high water; a ≈ before a time or height means it isn't printed in the programme and is estimated. "Start TBC" means the coach or instructor sets the start.</p>
-    <p>Add to calendar saves a file that opens in your phone's Calendar. The programme gives start times but not finish times, so timed entries last 3 hours unless a time range is shown, and "start TBC" items are added as all-day entries.</p>
+    <p>Add to calendar saves a file that opens in your phone's Calendar. A racing entry runs from 1.5 hours before the first start to 3 hours after high water, to allow rigging and de-rigging time. Events and training last 3 hours unless a time range is shown, and "start TBC" items are added as all-day entries.</p>
     <p>Unofficial. Check the club website and newsletters for updates.</p>
     <p class="version" id="version"></p>
     <details class="support"><summary>Support info</summary><ul id="supportList"></ul></details>
@@ -426,7 +428,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
 </dialog>
 
 <dialog id="chartFull" aria-label="Race marks chart, full size">
-  <button class="chart-full-close" type="button" id="chartFull-close">Close</button>
+  <button class="pill-dark chart-full-close" type="button" id="chartFull-close">Close</button>
   <div class="chart-full-scroll" id="chartFull-scroll"></div>
 </dialog>
 
@@ -438,7 +440,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
         <div class="sail-meta" id="sail-meta"></div>
         <div class="sail-quick" id="sail-quick"></div>
       </div>
-      <button class="sail-close" type="button" id="sail-close">Close</button>
+      <button class="pill-dark" type="button" id="sail-close">Close</button>
     </div>
     <ul class="sail-list" id="sail-list"></ul>
   </div>
@@ -450,7 +452,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
    only needs a new programme.csv (same column headings).
 ------------------------------------------------------------------ */
 const CONFIG = {
-  version: "2.15.1", released: "2026-10-01",   // bump both here and in sw.js, and add a line to CHANGELOG.md
+  version: "2.15.3", released: "2026-10-01",   // bump both here and in sw.js, and add a line to CHANGELOG.md
   filePattern: "programme-{year}.csv",  // one file per season: programme-2026.csv, programme-2027.csv, ...
   yearsBack: 1, yearsAhead: 2,          // which years to look for around the current year
   legacyFile: "programme.csv",          // an older single file: used for its own year if no dated file covers it
@@ -478,6 +480,7 @@ const now = new Date();
 const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 const DAY = 86400000;
 
+document.addEventListener("click", e => { const b = e.target.closest("button"); if (b && e.detail !== 0) b.blur(); });
 function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; }
 function pillBtn(label, onClick) { const b = el("button", "pill", label); b.type = "button"; b.addEventListener("click", onClick); return b; }
 function daysFrom(d) { return Math.round((d - today) / DAY); }
@@ -914,7 +917,7 @@ function icsFold(line) {
 }
 function icsDate(d) { return d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()); }
 function icsDT(d, hhmm) { const [h, m] = hhmm.split(":").map(Number); return icsDate(d) + "T" + p2(h) + p2(m) + "00"; }
-function addMin(hhmm, mins) { const t = Math.min(1439, toMin(hhmm) + mins); return p2(Math.floor(t / 60)) + ":" + p2(t % 60); }
+function addMin(hhmm, mins) { const t = Math.max(0, Math.min(1439, toMin(hhmm) + mins)); return p2(Math.floor(t / 60)) + ":" + p2(t % 60); }
 function slug(t) { return String(t).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40); }
 
 function dayCalendarEvents(day) {
@@ -922,10 +925,11 @@ function dayCalendarEvents(day) {
   const hw = day.hw ? "High water " + day.hw + (isNaN(day.ht) ? "" : " (" + day.ht.toFixed(1) + " m)") + (day.est ? ", estimated" : "") : "";
   const tail = [hw, day.gp ? "Grand Prix weekend" : ""].filter(Boolean);
   const range = d => { const m = /(\d{1,2}:\d\d)\s*[–-]\s*(\d{1,2}:\d\d)/.exec(d || ""); return m ? [m[1].padStart(5, "0"), m[2].padStart(5, "0")] : null; };
-  const push = (kind, summary, start, detail, lines, location) => {
+  const push = (kind, summary, start, detail, lines, location, override) => {
     const r = range(detail); let s = /^\d\d:\d\d$/.test(start) ? start : "", e = "";
     if (!s && r && start !== "TBC") s = r[0];
     if (s) e = r && r[0] === s ? r[1] : addMin(s, CONFIG.defaultMinutes);
+    if (override) { s = override.s; e = override.e; }
     out.push({ uid: day.iso + "-" + kind + "-" + slug(summary) + "@bsc-sailing-calendar", date: day.date, summary, start: s, end: e, desc: [...lines, ...tail].join("\n"), location: location || CONFIG.venue });
   };
   if (it.racing.length) {
@@ -935,7 +939,12 @@ function dayCalendarEvents(day) {
       const who = g.all ? "all fleets" : (state.fleets.length && sel.length ? sel.map(x => x.fleet).join(", ") : g.fleets.join(", "));
       return "Start order " + (sel.length ? orderText(sel) : g.orderText) + ", " + who + ": " + g.label;
     }));
-    push("race", "Racing: " + labels.slice(0, 3).join(", ") + (labels.length > 3 ? " +" + (labels.length - 3) + " more" : ""), st, "", lines, "");
+    // 1.5 hours before the first start, to 3 hours after high water — rigging
+    // and de-rigging time either side, not just the length of the racing.
+    const override = /^\d\d:\d\d$/.test(st)
+      ? { s: addMin(st, -90), e: (day.hw && /^\d\d:\d\d$/.test(day.hw)) ? addMin(day.hw, 180) : addMin(st, CONFIG.defaultMinutes) }
+      : null;
+    push("race", "Racing: " + labels.slice(0, 3).join(", ") + (labels.length > 3 ? " +" + (labels.length - 3) + " more" : ""), st, "", lines, "", override);
   }
   it.events.forEach(e => push("event", e.label + (e.start === "TBC" ? " (start TBC)" : ""), e.start, e.detail, [e.tag, e.fleets.length ? "For: " + fleetsText(e.fleets) : "", e.detail].filter(Boolean), /^BJRC/.test(e.label) && e.detail ? e.detail : ""));
   it.training.forEach(t => push("train", t.label + (t.tag ? " (" + t.tag + ")" : "") + (t.start === "TBC" || !t.start ? " (start TBC)" : ""), t.start, t.detail, [t.detail].filter(Boolean), ""));
@@ -1145,10 +1154,10 @@ function wxCell(hh, wx) {
   return c;
 }
 function crossRefLabel(it) {
-  if (it.racing.length) return "Club racing scheduled — see details";
-  if (it.training.length && !it.events.length) return "Training scheduled — see details";
-  if (it.events.length) return "Club event scheduled — see details";
-  return "Something's on this day — see details";
+  if (it.racing.length) return "Club racing scheduled.";
+  if (it.training.length && !it.events.length) return "Training scheduled.";
+  if (it.events.length) return "Club event scheduled.";
+  return "Something's on this day.";
 }
 let tideSelectedDate = null;
 function renderTideDetail(iso, tideByDate) {
@@ -1170,6 +1179,7 @@ function renderTideDetail(iso, tideByDate) {
   // same style as a day's own details screen — falling back to whichever of
   // those three hours actually has forecast data (the forecast only covers
   // the next ~16 days), and to nothing at all beyond that.
+  let shownForecast = false;
   if (WX.status === "idle" || WX.status === "loading") {
     box.appendChild(el("p", "tide-wx-muted", "Loading forecast…"));
   } else if (WX.status === "error") {
@@ -1182,6 +1192,7 @@ function renderTideDetail(iso, tideByDate) {
       const strip = el("div", "wx-strip");
       cells.forEach(({ h, d }) => strip.appendChild(wxCell(h, d)));
       box.appendChild(strip);
+      shownForecast = true;
     } else {
       box.appendChild(el("p", "tide-wx-muted", "No forecast available."));
     }
@@ -1189,13 +1200,19 @@ function renderTideDetail(iso, tideByDate) {
     box.appendChild(el("p", "tide-wx-muted", "No forecast available."));
   }
 
-  // Weather source, and the estimated-tide footnote right alongside it.
-  const foot = el("p", "wx-credit");
-  foot.appendChild(document.createTextNode("Forecast for " + CONFIG.forecast.place + " from "));
-  const a = el("a", "", "Open-Meteo.com"); a.href = "https://open-meteo.com/"; a.target = "_blank"; a.rel = "noopener";
-  foot.appendChild(a); foot.appendChild(document.createTextNode("."));
-  if (est) foot.appendChild(document.createTextNode(" ≈ This tide isn't printed in the programme, so it's an estimate."));
-  box.appendChild(foot);
+  // Weather source only when a forecast actually showed — irrelevant otherwise.
+  // The estimated-tide footnote sits alongside it when there is one; on its own
+  // (no forecast shown) it gets its own line instead.
+  if (shownForecast) {
+    const foot = el("p", "wx-credit");
+    foot.appendChild(document.createTextNode("Forecast for " + CONFIG.forecast.place + " from "));
+    const a = el("a", "", "Open-Meteo.com"); a.href = "https://open-meteo.com/"; a.target = "_blank"; a.rel = "noopener";
+    foot.appendChild(a); foot.appendChild(document.createTextNode("."));
+    if (est) foot.appendChild(document.createTextNode(" ≈ This tide isn't printed in the programme, so it's an estimate."));
+    box.appendChild(foot);
+  } else if (est) {
+    box.appendChild(el("p", "wx-credit", "≈ This tide isn't printed in the programme, so it's an estimate."));
+  }
 
   const day = DAYS.find(d => d.iso === iso);
   if (day) {
@@ -1567,9 +1584,9 @@ async function renderSupport() {
   try { const keys = (await caches.keys()).filter(k => k.startsWith("bsc-sailing")); add("Saved copy: " + (keys.join(", ") || "none")); } catch (e) {}
   add("Online: " + (navigator.onLine ? "yes" : "no"));
   const ev = await loadEvents();
-  add("Club events: " + (ev && ev.generated ? "updated " + timeAgo(ev.generated) : "couldn't load"));
+  add("Club events: content last changed " + (ev && ev.generated ? timeAgo(ev.generated) : "unknown") + " (the daily check runs regardless — this only moves when there's something new)");
   const td = await loadTides();
-  add("Tide reference: " + (td && td.generated ? "updated " + timeAgo(td.generated) : "couldn't load"));
+  add("Tide reference: content last changed " + (td && td.generated ? timeAgo(td.generated) : "unknown") + " (the weekly check runs regardless — this only moves when there's something new)");
 }
 
 /* Add ?check to the address to see a data check for the season on screen */
