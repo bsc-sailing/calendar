@@ -84,40 +84,59 @@ if [[ -z "$ZIP_ARG" ]]; then
   fi
 fi
 
-# ---- unzip to a scratch dir and read the version out of index.html
+# ---- unzip to a scratch dir. index.html is how a full release's version
+# gets read and tagged — if this zip doesn't have one (a docs-only or
+# single-file fix, e.g. just a README), skip version handling entirely
+# rather than refusing to apply the zip at all.
 WORK_DIR="$(mktemp -d)"
 trap 'rm -rf "$WORK_DIR"' EXIT
 unzip -q "$ZIP_PATH" -d "$WORK_DIR"
-[[ -f "$WORK_DIR/index.html" ]] || die "index.html not found at the top level of that zip."
 
-NEW_VERSION="$(grep -o 'version: "[0-9][0-9.]*"' "$WORK_DIR/index.html" | head -n1 | grep -o '[0-9][0-9.]*')"
-[[ -n "$NEW_VERSION" ]] || die "Couldn't read a version number out of index.html."
+PARTIAL=false
+NEW_VERSION=""
+if [[ -f "$WORK_DIR/index.html" ]]; then
+  NEW_VERSION="$(grep -o 'version: "[0-9][0-9.]*"' "$WORK_DIR/index.html" | head -n1 | grep -o '[0-9][0-9.]*')"
+  [[ -n "$NEW_VERSION" ]] || die "index.html is in the zip but has no readable version number."
+else
+  PARTIAL=true
+  warn "No index.html in this zip — treating it as a partial update (docs/files only, no version tag)."
+  info "Files in this zip:"
+  ( cd "$WORK_DIR" && find . -type f ) | sed 's/^/  /'
+fi
 
 CURRENT_VERSION=""
 if [[ -f "$REPO_ROOT/index.html" ]]; then
   CURRENT_VERSION="$(grep -o 'version: "[0-9][0-9.]*"' "$REPO_ROOT/index.html" | head -n1 | grep -o '[0-9][0-9.]*' || true)"
 fi
 
-echo
-info "${c_bold}Currently live (as far as this checkout goes): ${CURRENT_VERSION:-none}${c_off}"
-info "${c_bold}Zip contains:                                  $NEW_VERSION${c_off}"
-echo
+if ! $PARTIAL; then
+  echo
+  info "${c_bold}Currently live (as far as this checkout goes): ${CURRENT_VERSION:-none}${c_off}"
+  info "${c_bold}Zip contains:                                  $NEW_VERSION${c_off}"
+  echo
 
-if [[ "$NEW_VERSION" == "$CURRENT_VERSION" ]]; then
-  warn "That's the same version already in the repo. Nothing to do, unless you're re-applying it deliberately."
-  confirm "Continue anyway?" || { info "Stopped."; exit 0; }
+  if [[ "$NEW_VERSION" == "$CURRENT_VERSION" ]]; then
+    warn "That's the same version already in the repo. Nothing to do, unless you're re-applying it deliberately."
+    confirm "Continue anyway?" || { info "Stopped."; exit 0; }
+  fi
+
+  confirm "Apply v$NEW_VERSION from this zip?" || { info "Stopped."; exit 0; }
+else
+  confirm "Apply this partial update (no version tag will be created)?" || { info "Stopped."; exit 0; }
 fi
 
-confirm "Apply v$NEW_VERSION from this zip?" || { info "Stopped."; exit 0; }
-
-# ---- back up the current version as a tag, before changing anything
-BACKUP_TAG="backup-before-v$NEW_VERSION"
-if git rev-parse "$BACKUP_TAG" >/dev/null 2>&1; then
-  info "Tag $BACKUP_TAG already exists — skipping (probably a re-run)."
-else
-  git tag -a "$BACKUP_TAG" -m "Live version before v$NEW_VERSION"
-  git push origin "$BACKUP_TAG"
-  ok "Pushed backup tag $BACKUP_TAG"
+# ---- back up the current version as a tag, before changing anything —
+# skipped for a partial update, since there's no new version to back up in
+# front of (the existing v$CURRENT_VERSION tag already covers this state)
+if ! $PARTIAL; then
+  BACKUP_TAG="backup-before-v$NEW_VERSION"
+  if git rev-parse "$BACKUP_TAG" >/dev/null 2>&1; then
+    info "Tag $BACKUP_TAG already exists — skipping (probably a re-run)."
+  else
+    git tag -a "$BACKUP_TAG" -m "Live version before v$NEW_VERSION"
+    git push origin "$BACKUP_TAG"
+    ok "Pushed backup tag $BACKUP_TAG"
+  fi
 fi
 
 # ---- copy the new files in (does not delete files that aren't in the zip —
@@ -139,17 +158,33 @@ if [[ -z "$(git status --porcelain)" ]]; then
   exit 0
 fi
 
-confirm "Commit and push v$NEW_VERSION?" || { info "Stopped. Changes are staged but not committed — 'git restore --staged .' to undo."; exit 0; }
+if $PARTIAL; then
+  confirm "Commit and push this partial update?" || { info "Stopped. Changes are staged but not committed — 'git restore --staged .' to undo."; exit 0; }
+else
+  confirm "Commit and push v$NEW_VERSION?" || { info "Stopped. Changes are staged but not committed — 'git restore --staged .' to undo."; exit 0; }
+fi
 
-# ---- pull a short description out of CHANGELOG.md's newest entry, if present
-COMMIT_MSG="v$NEW_VERSION"
-if [[ -f "$REPO_ROOT/CHANGELOG.md" ]]; then
-  NOTES="$(awk '/^## /{n++} n==1 && !/^## /' "$REPO_ROOT/CHANGELOG.md" | sed '/^\s*$/d' | head -n 6)"
-  [[ -n "$NOTES" ]] && COMMIT_MSG="$(printf 'v%s\n\n%s' "$NEW_VERSION" "$NOTES")"
+# ---- commit message: a version header for a full release (with notes pulled
+# from CHANGELOG.md's newest entry, if present), or a plain summary of what
+# changed for a partial one — there's no version to head it with
+if $PARTIAL; then
+  FILES_CHANGED="$(git diff --cached --name-only | tr '\n' ' ')"
+  COMMIT_MSG="Update: $FILES_CHANGED"
+else
+  COMMIT_MSG="v$NEW_VERSION"
+  if [[ -f "$REPO_ROOT/CHANGELOG.md" ]]; then
+    NOTES="$(awk '/^## /{n++} n==1 && !/^## /' "$REPO_ROOT/CHANGELOG.md" | sed '/^\s*$/d' | head -n 6)"
+    [[ -n "$NOTES" ]] && COMMIT_MSG="$(printf 'v%s\n\n%s' "$NEW_VERSION" "$NOTES")"
+  fi
 fi
 
 git commit -m "$COMMIT_MSG"
 git push
+
+if $PARTIAL; then
+  ok "Pushed partial update."
+  exit 0
+fi
 
 if git rev-parse "v$NEW_VERSION" >/dev/null 2>&1; then
   warn "Tag v$NEW_VERSION already exists — not re-tagging."
