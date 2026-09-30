@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-30T18:04:05Z",
+  "generated": "2026-09-30T18:41:35Z",
   "method": "harmonic tide model \u2014 see scripts/tide/TIDES.md",
   "fit_rms_m": 0.108,
   "accuracy_check_against_training_points": {

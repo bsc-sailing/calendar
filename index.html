@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BSC Sailing Calendar app, version 2.15.0 (2026-09-30) -->
+<!-- BSC Sailing Calendar app, version 2.15.1 (2026-10-01) -->
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
@@ -150,15 +150,15 @@ button.day-btn:focus-visible { outline-offset: -3px; }
 .gauge i { display: block; height: 100%; background: var(--water); }
 .empty { padding: 32px 8px; text-align: center; color: var(--muted); }
 .chartlink { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 14px; }
-.navlink { font-size: 0.76rem; padding: 6px 8px; white-space: nowrap; }
+.navlink { font-size: 0.76rem; padding: 6px 8px; white-space: normal; line-height: 1.2; text-align: center; }
 dialog#marks { border: 0; padding: 0; background: var(--surface); color: var(--ink); width: min(100%, 640px); max-width: 100%; height: 100%; max-height: 100%; margin: 0 auto; border-radius: 0; }
 @media (min-width: 700px) { dialog#marks { height: 85vh; max-height: 720px; margin: auto; border-radius: 10px; } }
 dialog#marks::backdrop { background: rgba(8, 20, 30, 0.6); }
 .marks-in { display: flex; flex-direction: column; height: 100%; padding: calc(env(safe-area-inset-top, 14px) + 22px) 14px 0; box-sizing: border-box; }
-.marks-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex: none; }
+.marks-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex: none; }
 .marks-top h2 { font-family: var(--display); font-size: 1.3rem; margin: 0; }
 .marks-tabs .pill { flex: 1; }
-.marks-pane { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 14px; }
+.marks-pane { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding-bottom: 14px; }
 .marks-pane[hidden] { display: none; }
 .chart-box { position: relative; width: 100%; aspect-ratio: 4/3; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; padding: 0; cursor: zoom-in; }
 .chart-box img { display: block; width: 100%; height: 100%; border: 0; object-fit: contain; background: #fff; }
@@ -197,8 +197,8 @@ dialog#chartFull::backdrop { background: #000; }
 
 .tide-date-wrap { margin: 0 0 14px; }
 .tide-date-wrap label { display: block; font-size: 0.85rem; color: var(--muted); margin: 0 0 4px; }
-.tide-date-wrap input[type="date"] { width: 100%; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 9px 11px; box-sizing: border-box; }
-.tide-detail { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin: 0 0 16px; background: var(--bg); }
+.tide-date-wrap input[type="date"] { width: 100%; max-width: 100%; min-width: 0; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 9px 11px; box-sizing: border-box; }
+.tide-detail { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin: 0 0 16px; background: var(--bg); box-sizing: border-box; max-width: 100%; touch-action: pan-y; cursor: grab; user-select: none; }
 .tide-detail-date { font-family: var(--display); font-weight: 700; font-size: 1.15rem; margin: 0 0 10px; }
 .tide-detail-nums { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 10px; }
 .tide-detail-nums b { display: block; font-family: var(--display); font-size: 1.5rem; line-height: 1.15; }
@@ -331,7 +331,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
 <div class="wrap">
   <div class="brand"><a href="https://blackwatersailingclub.org.uk/" target="_blank" rel="noopener"><img class="logo" src="logo.png" alt="Blackwater Sailing Club" width="56" height="56" onerror="this.hidden=true"></a><h1 id="title">BSC Sailing Calendar</h1></div>
   <p class="sub" id="sub">Races, events, training and tides for every day of the season.</p>
-  <div class="chartlink"><button class="pill navlink" type="button" id="openCourses">Race Courses</button><button class="pill navlink" type="button" id="openChart">Race Marks Map</button><button class="pill navlink" type="button" id="openEvents">Club Events</button><button class="pill navlink" type="button" id="openTides">Tides &amp; Weather</button></div>
+  <div class="chartlink"><button class="pill navlink" type="button" id="openCourses">Race<br>Courses</button><button class="pill navlink" type="button" id="openChart">Race Marks<br>Map</button><button class="pill navlink" type="button" id="openEvents">Club<br>Events</button><button class="pill navlink" type="button" id="openTides">Tides &amp;<br>Weather</button></div>
 
   <section class="seasonbar" id="seasonbar" hidden>
     <div class="row-scroll" id="seasons" role="group" aria-label="Season"></div>
@@ -411,6 +411,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
         <input type="date" id="tideDateInput">
       </div>
       <div class="tide-detail" id="tideDetail"></div>
+      <p class="next-hint" id="tideSwipeHint">Swipe left for the next day, right for the previous one.</p>
       <h3 style="font-family:var(--display);font-size:1rem;margin:0 0 4px;">Next 14 days</h3>
       <ul class="tide-list" id="tideList"></ul>
     </div>
@@ -449,7 +450,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
    only needs a new programme.csv (same column headings).
 ------------------------------------------------------------------ */
 const CONFIG = {
-  version: "2.15.0", released: "2026-09-30",   // bump both here and in sw.js, and add a line to CHANGELOG.md
+  version: "2.15.1", released: "2026-10-01",   // bump both here and in sw.js, and add a line to CHANGELOG.md
   filePattern: "programme-{year}.csv",  // one file per season: programme-2026.csv, programme-2027.csv, ...
   yearsBack: 1, yearsAhead: 2,          // which years to look for around the current year
   legacyFile: "programme.csv",          // an older single file: used for its own year if no dated file covers it
@@ -1132,18 +1133,31 @@ function fmtTideDate(iso) {
   const [y, m, d] = iso.split("-").map(Number);
   return fmtLong.format(new Date(y, m - 1, d));
 }
-function wxSnapshotFor(iso) {
-  if (WX.status !== "ok") return null;
-  return WX.byTime[iso + "T12:00"] || null;
+function isoOf(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function wxCell(hh, wx) {
+  const c = el("div", "wx"); c.appendChild(el("div", "wx-time", String(hh).padStart(2, "0") + ":00"));
+  const ic = document.createElement("div"); ic.innerHTML = ICONS[wxKind(wx.code, wx.day)]; c.appendChild(ic);
+  c.appendChild(el("div", "wx-temp", Math.round(wx.temp) + "°C")); c.appendChild(el("div", "wx-desc", WX_TEXT[wx.code] || ""));
+  const w = el("div", "wx-wind"), l1 = el("div", ""), dirSpan = el("span", "wx-dir");
+  dirSpan.setAttribute("aria-label", "Wind from " + compass(wx.dir)); dirSpan.innerHTML = ARROW.replace("DEG", String((Math.round(wx.dir) + 180) % 360));
+  dirSpan.appendChild(document.createTextNode(compass(wx.dir))); l1.appendChild(dirSpan); l1.appendChild(document.createTextNode(" ")); l1.appendChild(el("b", "", Math.round(wx.wind) + " kn"));
+  w.appendChild(l1); w.appendChild(el("div", "wx-gust", "gusts " + Math.round(wx.gust) + " kn")); c.appendChild(w);
+  return c;
+}
+function crossRefLabel(it) {
+  if (it.racing.length) return "Club racing scheduled — see details";
+  if (it.training.length && !it.events.length) return "Training scheduled — see details";
+  if (it.events.length) return "Club event scheduled — see details";
+  return "Something's on this day — see details";
 }
 let tideSelectedDate = null;
 function renderTideDetail(iso, tideByDate) {
   const box = $("tideDetail"); box.textContent = "";
   const rec = tideByDate.get(iso);
+  const est = rec && rec.source === "Estimated";
   box.appendChild(el("div", "tide-detail-date", fmtTideDate(iso)));
   if (rec) {
     const nums = el("div", "tide-detail-nums");
-    const est = rec.source === "Estimated";
     [[(est ? "≈" : "") + rec.time, "High water"], [(est ? "≈" : "") + rec.height.toFixed(1) + " m", "Tide height"]].forEach(([v, l]) => {
       const f = el("div", ""); f.appendChild(el("b", "", v)); f.appendChild(el("span", "", l)); nums.appendChild(f);
     });
@@ -1151,24 +1165,44 @@ function renderTideDetail(iso, tideByDate) {
   } else {
     box.appendChild(el("p", "muted", "No tide estimate for this date."));
   }
-  const wx = wxSnapshotFor(iso);
-  if (wx) {
-    const row = el("div", "tide-wx-row");
-    const ic = document.createElement("div"); ic.innerHTML = ICONS[wxKind(wx.code, wx.day)]; row.appendChild(ic);
-    const txt = el("div", "");
-    txt.appendChild(el("b", "", Math.round(wx.temp) + "°C, " + (WX_TEXT[wx.code] || "")));
-    const dirSpan = el("span", "wx-dir"); dirSpan.innerHTML = ARROW.replace("DEG", String((Math.round(wx.dir) + 180) % 360)); dirSpan.appendChild(document.createTextNode(compass(wx.dir)));
-    const w = el("div", ""); w.appendChild(dirSpan); w.appendChild(document.createTextNode(" " + Math.round(wx.wind) + " kn, gusts " + Math.round(wx.gust) + " kn"));
-    txt.appendChild(w); row.appendChild(txt); box.appendChild(row);
+
+  // Weather: a 3-cell strip anchored on high water (HW-2h, HW, HW+2h), the
+  // same style as a day's own details screen — falling back to whichever of
+  // those three hours actually has forecast data (the forecast only covers
+  // the next ~16 days), and to nothing at all beyond that.
+  if (WX.status === "idle" || WX.status === "loading") {
+    box.appendChild(el("p", "tide-wx-muted", "Loading forecast…"));
+  } else if (WX.status === "error") {
+    box.appendChild(el("p", "tide-wx-muted", "The forecast couldn't be loaded. It needs an internet connection."));
+  } else if (rec && /^\d\d:\d\d$/.test(rec.time)) {
+    const hwHour = parseInt(rec.time.slice(0, 2), 10);
+    const wanted = [hwHour - 2, hwHour, hwHour + 2].filter(h => h >= 0 && h <= 23);
+    const cells = wanted.map(h => ({ h, d: WX.byTime[iso + "T" + String(h).padStart(2, "0") + ":00"] })).filter(c => c.d);
+    if (cells.length) {
+      const strip = el("div", "wx-strip");
+      cells.forEach(({ h, d }) => strip.appendChild(wxCell(h, d)));
+      box.appendChild(strip);
+    } else {
+      box.appendChild(el("p", "tide-wx-muted", "No forecast available."));
+    }
   } else {
     box.appendChild(el("p", "tide-wx-muted", "No forecast available."));
   }
+
+  // Weather source, and the estimated-tide footnote right alongside it.
+  const foot = el("p", "wx-credit");
+  foot.appendChild(document.createTextNode("Forecast for " + CONFIG.forecast.place + " from "));
+  const a = el("a", "", "Open-Meteo.com"); a.href = "https://open-meteo.com/"; a.target = "_blank"; a.rel = "noopener";
+  foot.appendChild(a); foot.appendChild(document.createTextNode("."));
+  if (est) foot.appendChild(document.createTextNode(" ≈ This tide isn't printed in the programme, so it's an estimate."));
+  box.appendChild(foot);
+
   const day = DAYS.find(d => d.iso === iso);
   if (day) {
     const it = visibleItems(day);
     if (hasContent(it)) {
       const cr = el("div", "tide-crossref");
-      cr.appendChild(el("span", "", "There's also something on this day."));
+      cr.appendChild(el("span", "", crossRefLabel(it)));
       cr.appendChild(pillBtn("See details", () => { $("marks").close(); openDetail(day, DAYS); }));
       box.appendChild(cr);
     }
@@ -1179,7 +1213,27 @@ function selectTideDate(iso, tideByDate) {
   $("tideDateInput").value = iso;
   renderTideDetail(iso, tideByDate);
   $("tideList").querySelectorAll("button").forEach(b => b.setAttribute("aria-current", String(b.dataset.iso === iso)));
-  $("pane-tides").scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+}
+function tideShow(delta, tideByDate, windowRange) {
+  if (!tideSelectedDate) return;
+  const [y, m, d] = tideSelectedDate.split("-").map(Number);
+  const next = new Date(y, m - 1, d + delta);
+  const iso = isoOf(next);
+  if (iso < windowRange[0] || iso > windowRange[1]) return;
+  selectTideDate(iso, tideByDate);
+}
+let tideSwipeInit = false;
+function initTideSwipe(tideByDate, windowRange) {
+  if (tideSwipeInit) return; tideSwipeInit = true;
+  const box = $("tideDetail");
+  let sx = 0, sy = 0, dragging = false;
+  box.addEventListener("pointerdown", e => { dragging = true; sx = e.clientX; sy = e.clientY; });
+  box.addEventListener("pointerup", e => {
+    if (!dragging) return; dragging = false;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) tideShow(dx < 0 ? 1 : -1, tideByDate, windowRange);
+  });
+  box.addEventListener("pointercancel", () => { dragging = false; });
 }
 async function renderTidesScreen() {
   const data = await loadTides();
@@ -1191,13 +1245,14 @@ async function renderTidesScreen() {
   const tideByDate = new Map(data.tides.map(t => [t.date, t]));
   input.disabled = false; input.min = data.window[0]; input.max = data.window[1];
   input.onchange = () => { if (input.value) selectTideDate(input.value, tideByDate); };
+  initTideSwipe(tideByDate, data.window);
 
   const list = $("tideList"); list.textContent = "";
   const t0 = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
   let shown = 0;
   for (let i = 0; i < 60 && shown < CONFIG.tidesListDays; i++) {
     const dt = new Date(t0.getTime() + i * DAY);
-    const iso = dt.getFullYear() + "-" + String(dt.getMonth() + 1).padStart(2, "0") + "-" + String(dt.getDate()).padStart(2, "0");
+    const iso = isoOf(dt);
     const rec = tideByDate.get(iso);
     if (!rec) continue;
     shown++;
@@ -1208,7 +1263,7 @@ async function renderTidesScreen() {
     btn.addEventListener("click", () => selectTideDate(iso, tideByDate));
     li.appendChild(btn); list.appendChild(li);
   }
-  const todayIso = t0.getFullYear() + "-" + String(t0.getMonth() + 1).padStart(2, "0") + "-" + String(t0.getDate()).padStart(2, "0");
+  const todayIso = isoOf(t0);
   const defaultIso = (tideSelectedDate && tideByDate.has(tideSelectedDate)) ? tideSelectedDate : (tideByDate.has(todayIso) ? todayIso : data.window[0]);
   selectTideDate(defaultIso, tideByDate);
 }
@@ -1511,6 +1566,10 @@ async function renderSupport() {
   add("Offline copy: " + (navigator.serviceWorker && navigator.serviceWorker.controller ? "active" : "not active yet"));
   try { const keys = (await caches.keys()).filter(k => k.startsWith("bsc-sailing")); add("Saved copy: " + (keys.join(", ") || "none")); } catch (e) {}
   add("Online: " + (navigator.onLine ? "yes" : "no"));
+  const ev = await loadEvents();
+  add("Club events: " + (ev && ev.generated ? "updated " + timeAgo(ev.generated) : "couldn't load"));
+  const td = await loadTides();
+  add("Tide reference: " + (td && td.generated ? "updated " + timeAgo(td.generated) : "couldn't load"));
 }
 
 /* Add ?check to the address to see a data check for the season on screen */

@@ -2,6 +2,13 @@
 
 Version numbers are in `CONFIG.version` in `index.html` and `VERSION` in `sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**.
 
+## 2.15.1 – 1 Oct 2026
+- Support info now shows when Club Events and the tide reference were each last updated — the easiest way to notice either scheduled job has quietly stopped working, without checking GitHub.
+- Nav buttons now wrap their own text onto two lines (e.g. "Race / Courses") instead of the whole row wrapping — all four fit on one line as a result.
+- Tides & Weather: swipe the detail card left/right to step through days, the same way the home screen's "Next on" card does. Weather now shows the same 3-hour strip (2 hours either side of high water) used on a day's own details screen, rather than a single midday snapshot, with a source link and — when the tide is estimated — a footnote saying so next to it. The cross-reference note now says what's actually on (racing, training, or an event) instead of "something."
+- Fixed a possible horizontal scrollbar on the Tides & Weather screen, most likely from the native date picker on iOS.
+- Made the Race Courses / Race Marks Map / Club Events / Tides & Weather title row match how GO SAIL and the day sheet already positioned their Close button (anchored to the top, not vertically centred) — the one real inconsistency found while investigating an ongoing report that Close still isn't fully clear of content on some screens. Not confirmed as the actual fix; still needs a fresh screenshot to diagnose properly if it persists.
+
 ## 2.15.0 – 30 Sep 2026
 - New **Tides & Weather** screen, alongside Race Courses, Race Marks Map and Club Events — a tide and (within ~16 days) forecast for any date, via a date picker or the next 14 days listed below it. Built from the new `tides.json` reference: any date with a real printed tide shows it exactly, with no `≈`; only genuinely unknown dates get the estimate. If the selected date has racing or an event on, a note offers to open its full day details.
 - The four buttons under the title now wrap onto two lines rather than fitting one — a deliberate trade-off to make room for the new screen.

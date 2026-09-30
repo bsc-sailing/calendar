@@ -74,11 +74,11 @@ Neither file is year-aware the way the programme data is — a new chart or cour
 
 ## Tides & Weather
 
-Tap **Tides & Weather** for a tide and forecast for any date, not just days that happen to have racing or an event. Enter a date directly, or pick from the next 14 days shown below it. If a real racing day has something on already, a note offers to open its full details.
+Tap **Tides & Weather** for a tide and forecast for any date, not just days that happen to have racing or an event. Enter a date directly, swipe left or right through days from the card itself, or pick from the next 14 days shown below it. If the selected day has racing, training or an event on, a note says so and offers to open its full details.
 
-This is built from `tides.json` (see `scripts/tide/TIDES.md`), which is a separate, independent dataset from each season's `programme-YEAR.csv` — kept apart deliberately, since the programme files are prepared by hand and shouldn't have anything automated writing to them. Wherever a date's real tide is known (it's in a season's printed programme), this screen shows that exact value, with no `≈` — only dates with no real data get the model's estimate.
+This is built from `tides.json` (see `scripts/tide/TIDES.md`), which is a separate, independent dataset from each season's `programme-YEAR.csv` — kept apart deliberately, since the programme files are prepared by hand and shouldn't have anything automated writing to them. Wherever a date's real tide is known (it's in a season's printed programme), this screen shows that exact value, with no `≈`; only dates with no real data get the model's estimate, and a footnote says so next to the forecast source.
 
-Weather only shows for dates within the next 16 days or so — that's the limit of what a real forecast can cover; further out, it just shows the tide.
+Weather shows as a 3-hour strip centred on that day's high water (2 hours before, at, and 2 hours after) — the same style as a day's own details screen — for whichever of those hours fall within the forecast's ~16-day range. Further out, only the tide shows.
 
 ## Club Events
 
@@ -132,7 +132,7 @@ Weekly sessions (Mirror sailing and Beach Club) are named in `CONFIG.weekly` nea
 
 ## Version and support
 
-The version number is at the bottom of the app. Tap **Support info** there for the app version, the seasons loaded (with the date each data file was last updated), whether the offline copy is active and which saved copy is in use. That is usually enough to work out whether someone is seeing an old version. Add `?check` to the address for a data check. `CHANGELOG.md` lists what changed in each version.
+The version number is at the bottom of the app. Tap **Support info** there for the app version, the seasons loaded (with the date each data file was last updated), whether the offline copy is active, which saved copy is in use, and when Club Events and the tide reference were each last updated — a quick way to spot either of their scheduled jobs having quietly stopped, without needing to check GitHub. That is usually enough to work out whether someone is seeing an old version. Add `?check` to the address for a data check. `CHANGELOG.md` lists what changed in each version.
 
 To release a new version: change `CONFIG.version` and `CONFIG.released` in `index.html`, change `VERSION` in `sw.js` to match, and add a line to `CHANGELOG.md`.
 
