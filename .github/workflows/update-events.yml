@@ -27,12 +27,32 @@ jobs:
       - name: Fetch and convert the events feed
         run: python3 scripts/update-events.py
 
-      - name: Commit and push if events.json changed
+      - name: Check whether the actual events data changed (ignoring the timestamp)
+        id: check
         run: |
-          if git diff --quiet -- events.json; then
-            echo "No change to events.json — nothing to push."
-            exit 0
-          fi
+          # events.json always carries a fresh "generated" timestamp, so a
+          # plain file diff would say "changed" on every single run, even
+          # when every event in it is identical — defeating the point of
+          # skipping no-op commits. Compare with that one field stripped
+          # out instead, in both the new file and whatever's already
+          # committed (if anything — there's nothing yet on a first run).
+          python3 - <<'PYEOF_INNER'
+          import json, os, subprocess
+          new = json.load(open("events.json")); new.pop("generated", None)
+          try:
+              old_raw = subprocess.run(["git", "show", "HEAD:events.json"], capture_output=True, text=True, check=True).stdout
+              old = json.loads(old_raw); old.pop("generated", None)
+          except Exception:
+              old = None
+          changed = old != new
+          print("Data change detected:", changed)
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"changed={'true' if changed else 'false'}\n")
+          PYEOF_INNER
+
+      - name: Commit and push
+        if: steps.check.outputs.changed == 'true'
+        run: |
           git config user.name "jfairhead"
           git config user.email "17782781+jfairhead@users.noreply.github.com"
           git add events.json

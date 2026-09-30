@@ -1,0 +1,68 @@
+name: Update tide reference
+
+# Refits the harmonic tide model against every programme-*.csv in the repo
+# (pooling all seasons present, not just the latest), and regenerates
+# tides.json: an estimated high water for every day in a rolling 24-month
+# window from today. This is what lets the app show a sensible "≈" tide
+# for any date, not just the specific extra dates a season's own file
+# happens to include. See scripts/tide/TIDES.md for the method and its
+# accuracy, and README.md ("Club Events") for why this pushes straight to
+# main using RELEASE_TOKEN rather than the default Actions identity — the
+# same reasoning and the same secret apply here.
+#
+# Runs weekly rather than daily: the model itself only changes when a new
+# programme-YEAR.csv is added, so there's nothing for a daily run to find
+# most weeks — this just keeps the rolling window's far end comfortably
+# ahead of "today" without needless noise in the Actions history.
+
+on:
+  schedule:
+    - cron: "43 6 * * 0"   # Sunday mornings; an odd time so it's not stuck at the top of everyone's cron
+  workflow_dispatch: {}
+
+jobs:
+  update-tides:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Install numpy
+        run: pip install --quiet numpy
+
+      - name: Regenerate the rolling tide reference
+        working-directory: scripts/tide
+        run: python3 generate-tide-reference.py --repo-root ../.. --months-ahead 24 --out ../../tides.json
+
+      - name: Check whether the actual tide data changed (ignoring the timestamp)
+        id: check
+        run: |
+          # tides.json always carries a fresh "generated" timestamp, so a plain
+          # file diff (or git status) would say "changed" on every single run,
+          # even when every prediction in it is identical — defeating the point
+          # of skipping no-op commits. Compare with that one field stripped out
+          # instead, in both the new file and whatever's already committed (if
+          # anything — there's nothing yet on the very first run).
+          python3 - <<'PYEOF_INNER'
+          import json, os, subprocess
+          new = json.load(open("tides.json")); new.pop("generated", None)
+          try:
+              old_raw = subprocess.run(["git", "show", "HEAD:tides.json"], capture_output=True, text=True, check=True).stdout
+              old = json.loads(old_raw); old.pop("generated", None)
+          except Exception:
+              old = None
+          changed = old != new
+          print("Data change detected:", changed)
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"changed={'true' if changed else 'false'}\n")
+          PYEOF_INNER
+
+      - name: Commit and push
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config user.name "jfairhead"
+          git config user.email "17782781+jfairhead@users.noreply.github.com"
+          git add tides.json
+          git commit -m "Update tide reference (automated)"
+          git push

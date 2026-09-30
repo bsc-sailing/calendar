@@ -72,6 +72,14 @@ To update either for a new season:
 
 Neither file is year-aware the way the programme data is — a new chart or course-card export needs its filename (and `CONFIG.chartImage` / `CONFIG.coursesFile`) updated by hand, rather than just being uploaded under a new year.
 
+## Tides & Weather
+
+Tap **Tides & Weather** for a tide and forecast for any date, not just days that happen to have racing or an event. Enter a date directly, or pick from the next 14 days shown below it. If a real racing day has something on already, a note offers to open its full details.
+
+This is built from `tides.json` (see `scripts/tide/TIDES.md`), which is a separate, independent dataset from each season's `programme-YEAR.csv` — kept apart deliberately, since the programme files are prepared by hand and shouldn't have anything automated writing to them. Wherever a date's real tide is known (it's in a season's printed programme), this screen shows that exact value, with no `≈` — only dates with no real data get the model's estimate.
+
+Weather only shows for dates within the next 16 days or so — that's the limit of what a real forecast can cover; further out, it just shows the tide.
+
 ## Club Events
 
 Tap **Club Events** for Open Days, RYA courses, talks, socials and other club events — things the racing programme doesn't cover. Each item shows its date, a short excerpt, and a link to the club's own page for the full details and registration.
@@ -85,8 +93,6 @@ Tap **Club Events** for Open Days, RYA courses, talks, socials and other club ev
 - **What it does and doesn't touch:** only `events.json` — never the programme, courses, or app code. A feed that returns zero events (an outage, or the club changing its page) is treated as a failure, not "no events" — the existing file is left alone rather than overwritten, and the run logs a warning. Only upcoming events are shown in the app; past ones drop off the list on their own as the date passes.
 - **If it stops finding anything:** the club's feed URL or structure has probably changed. Check `https://blackwatersailingclub.org.uk/events/RSS` still returns XML in that shape, and adjust `scripts/update-events.py` if not.
 
-## Adding a new season
-
 ## Adding a new season (2027 and beyond)
 
 Each season is one file named **`programme-YEAR.csv`**, for example `programme-2027.csv`. The app looks for the files for last year, this year and the next two years, so there is nothing to register and no code to change.
@@ -99,6 +105,8 @@ Each season is one file named **`programme-YEAR.csv`**, for example `programme-2
 To check a file before you rely on it, open the app with `?check` on the end of the address (for example `https://bsc-sailing.github.io/calendar/?check`). It lists problems such as dates in the wrong format, start times that aren't `HH:MM` or `TBC`, racing rows with no start time, and days with no tide.
 
 If you still have the older single `programme.csv` in the repo it keeps working: it's treated as the season for the year of its dates, unless a `programme-YEAR.csv` covers that year. You can delete it once `programme-2026.csv` is there.
+
+**Estimated tides (the `≈` ones):** for dates the club's programme doesn't print a tide for, `scripts/tide/tidefit.py` and `tide_predict.py` generate one and fill the blank rows automatically — see `scripts/tide/TIDES.md` for the full method, its accuracy, and the exact commands to run for a new season.
 
 ### The columns
 
