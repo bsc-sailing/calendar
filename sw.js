@@ -1,5 +1,5 @@
 // Network first, so updates show up straight away; falls back to the saved copy when offline.
-const VERSION = "2.15.3";                     // keep in step with CONFIG.version in index.html
+const VERSION = "2.15.4";                     // keep in step with CONFIG.version in index.html
 const CACHE = "bsc-sailing-" + VERSION;
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png", "logo.png", "chart-2026.jpg", "courses-2026.csv"];
 
@@ -17,7 +17,9 @@ self.addEventListener("activate", e => {
 
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
-  if (new URL(e.request.url).hostname === "api.open-meteo.com") return; // always live, never cached
+  const host = new URL(e.request.url).hostname;
+  if (host === "api.open-meteo.com") return;                                // always live, never cached
+  if (host === "gc.zgo.at" || host.endsWith(".goatcounter.com")) return;    // analytics: never cache or replay page counts
   e.respondWith(
     fetch(e.request)
       .then(res => {

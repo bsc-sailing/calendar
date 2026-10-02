@@ -2,6 +2,10 @@
 
 Version numbers are in `CONFIG.version` in `index.html` and `VERSION` in `sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**.
 
+## 2.15.4 – 2 Oct 2026
+- Added GoatCounter page-view counting (site `jf-bsc-calendar`), to see how much the app is used. GoatCounter uses no cookies and collects no personal data. Blocked by most ad blockers, so counts are a lower bound.
+- The service worker now leaves GoatCounter requests alone, so page counts are never cached or replayed from the offline copy.
+
 ## 2.15.3 – 1 Oct 2026
 - Reordered the nav buttons: Race Courses, Race Marks Map, Tides & Weather, Club Events — groups the three sailing-data screens together, with Club Events on its own at the end.
 

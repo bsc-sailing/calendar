@@ -168,3 +168,5 @@ To release a new version: change `CONFIG.version` and `CONFIG.released` in `inde
 | `scripts/sync-release.sh` | Applies a downloaded release zip to this repo: backs up the current version as a tag, copies the files in, commits, pushes, tags, and confirms the live site picked it up. Run it from the repo root as `./scripts/sync-release.sh`. |
 
 Weather data is from [Open-Meteo.com](https://open-meteo.com/).
+
+Page views are counted with [GoatCounter](https://www.goatcounter.com/) (site `jf-bsc-calendar`), which uses no cookies and collects no personal data. The tag is the last thing in `<head>` in `index.html`; delete that one `<script>` line to turn it off.
