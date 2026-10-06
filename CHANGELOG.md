@@ -2,6 +2,12 @@
 
 Version numbers are in `CONFIG.version` in `index.html` and `VERSION` in `sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**.
 
+## 2.16.6 – 6 Oct 2026
+- Extra-date requests are recognised by the form's questions, not the issue title, so retyping the title no longer stops a request being processed. Once a request is checked, its title is set automatically to "Extra date: YYYY-MM-DD Name".
+
+## 2.16.5 – 6 Oct 2026
+- Extra-date requests: whether to process one straight away now depends on the requester's write access to the repo, checked with GitHub, instead of the org membership shown on the issue (private org members showed as outsiders, so their requests were skipped). Duplicate runs when an issue is created are avoided, and requests from outside the club get a reply saying a maintainer will review them.
+
 ## 2.16.4 – 6 Oct 2026
 - Sunrise and sunset for Heybridge Basin, worked out on the device for any date (no data feed, works offline): a **Daylight** section in each day's details, a line in Tides & Weather, and SUNSET on the GO SAIL screen. Notes when high water falls after sunset or before sunrise.
 

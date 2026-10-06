@@ -1,6 +1,6 @@
 name: Add an extra date
 description: A race, event or session that isn't in the printed programme. Once approved, it's added to the calendar automatically.
-title: "[Extra date] "
+title: "Extra date"
 labels: ["extra-date"]
 body:
   - type: markdown
@@ -8,6 +8,7 @@ body:
       value: |
         Use this for dates added after the printed programme: informal races, socials, extra training.
         A club maintainer checks every request before it appears in the app. Tides are filled in automatically.
+        You can leave the title as it is: it's set from the date and name once the request is checked.
   - type: input
     id: date
     attributes:

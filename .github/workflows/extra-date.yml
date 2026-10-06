@@ -18,20 +18,52 @@ concurrency:
 
 jobs:
   build:
-    # Only extra-date requests, and only when the author is in the club org (or
-    # a collaborator), or a maintainer has added the "approved" label.
+    # Open issues made with the "Add an extra date" form, recognised by the
+    # form's own question headings in the body, not the title (people retype
+    # titles). A "labeled" event only matters when the label is "approved",
+    # and an edit only when the body changed (this workflow tidies the title
+    # itself, which mustn't start another run).
     if: >-
-      startsWith(github.event.issue.title, '[Extra date]') &&
       github.event.issue.state == 'open' &&
-      (contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association) ||
-       contains(github.event.issue.labels.*.name, 'approved'))
+      contains(github.event.issue.body, '### Date') &&
+      contains(github.event.issue.body, '### Start time') &&
+      contains(github.event.issue.body, '### Where') &&
+      (github.event.action != 'labeled' || github.event.label.name == 'approved') &&
+      (github.event.action != 'edited' || github.event.changes.body != null)
     runs-on: ubuntu-latest
     steps:
+      # Who may skip the queue: anyone with write access to this repo (checked
+      # with GitHub directly; org membership as shown on an issue can't be
+      # relied on, since private members show up as outsiders). Anyone else
+      # waits for a maintainer to add the "approved" label.
+      - name: Check the request is approved
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AUTHOR: ${{ github.event.issue.user.login }}
+          APPROVED: ${{ contains(github.event.issue.labels.*.name, 'approved') }}
+          ACTION: ${{ github.event.action }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          perm="$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$AUTHOR/permission" --jq .permission 2>/dev/null || echo none)"
+          echo "Requested by $AUTHOR, who has '$perm' access. Approved label: $APPROVED."
+          if [ "$APPROVED" = "true" ] || [ "$perm" = "admin" ] || [ "$perm" = "maintain" ] || [ "$perm" = "write" ]; then
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=false" >> "$GITHUB_OUTPUT"
+            echo "Waiting for a maintainer to add the 'approved' label." >> "$GITHUB_STEP_SUMMARY"
+            if [ "$ACTION" = "opened" ]; then
+              gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Thanks for the request. A club maintainer will check it and add the \`approved\` label, and it will then be added automatically."
+            fi
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.gate.outputs.go == 'true'
         with:
           ref: main
 
       - uses: actions/setup-python@v5
+        if: steps.gate.outputs.go == 'true'
         with:
           python-version: "3.12"
 
@@ -39,10 +71,11 @@ jobs:
       # script, never pasted into a shell command here.
       - name: Add the row
         id: add
+        if: steps.gate.outputs.go == 'true'
         run: python3 scripts/add-extra-date.py --event "$GITHUB_EVENT_PATH" --repo-root .
 
       - name: Explain what needs fixing
-        if: steps.add.outputs.ok != 'true'
+        if: steps.gate.outputs.go == 'true' && steps.add.outputs.ok != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ github.event.issue.number }}
@@ -67,3 +100,15 @@ jobs:
               --body-file add-extra-date-pr.md
             gh issue comment "$ISSUE" --body "Thanks. A pull request has been opened for a maintainer to review, and this will appear in the app once it's merged. Editing this issue updates the request."
           fi
+
+      # Give the issue a consistent, readable title, e.g. "Extra date: 2026-10-16 Blindfold Racing".
+      # Only the title changes, so this doesn't start another run (see "if" above).
+      - name: Tidy the issue title
+        if: steps.add.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+          CURRENT: ${{ github.event.issue.title }}
+        run: |
+          NEW="$(cat add-extra-date-title.txt)"
+          if [ -n "$NEW" ] && [ "$NEW" != "$CURRENT" ]; then gh issue edit "$ISSUE" --title "$NEW"; fi

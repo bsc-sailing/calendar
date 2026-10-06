@@ -113,9 +113,9 @@ Same columns as the programme, plus a `Request` column (the issue it came from).
 
 **Requesting one.** Anyone with a GitHub account can open an issue with the **Add an extra date** form (**Issues → New issue**). Nothing reaches the app without a maintainer's approval:
 
-1. When the person asking is a member of the bsc-sailing org, a workflow checks the form straight away. Otherwise it waits until a maintainer adds the `approved` label (only people with triage or write access can label). Requests from strangers therefore cost nothing but a glance.
+1. When the person asking has write access to this repo (you, Rob, the maintainers team), a workflow checks the form straight away. Anyone else gets a reply saying a maintainer will review it, and nothing happens until you add the `approved` label (only people with triage or write access can label). Requests from strangers therefore cost nothing but a glance.
 2. If a field doesn't make sense (a date in the past, a start time that isn't `HH:MM`), it comments on the issue saying what to fix. Editing the issue re-checks it.
-3. Otherwise it opens a pull request adding the row to `extras-YEAR.csv`. The PR is opened by `github-actions[bot]`, so either code owner can approve it, including whoever asked.
+3. Otherwise it opens a pull request adding the row to `extras-YEAR.csv`, and renames the issue "Extra date: YYYY-MM-DD Name". (The workflow recognises a request by the form's questions, so whatever title the requester types doesn't matter.) The PR is opened by `github-actions[bot]`, so either code owner can approve it, including whoever asked.
 4. Merging the PR publishes it and closes the issue.
 
 Every field is treated as untrusted text: checked against what it should look like, stripped of control characters, length-limited, read from the event file rather than pasted into a shell command, and shown in the app as plain text only.

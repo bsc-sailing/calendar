@@ -174,6 +174,7 @@ def main():
         f"| | |\n| --- | --- |\n| Date | {iso} |\n| Name | {name} |\n| Type | {f.get('Type', '')} |\n"
         f"| Start | {start} |\n| Detail | {detail} |\n| High water | {tide_txt} |\n\n"
         f"Closes #{num}\n")
+    open("add-extra-date-title.txt", "w").write(f"Extra date: {iso} {name}")
     set_output(ok="true", file=os.path.relpath(path, args.repo_root))
 
 
