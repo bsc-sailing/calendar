@@ -1,4 +1,2 @@
-# Every file in this repo needs a review from one of the people below before
-# a pull request can be merged. See README.md for how this is enforced
-# (Settings -> Rulesets, on main) and why the owner can still push directly.
-*   @jfairhead
+# Every file: any member of the maintainers team can approve
+* @bsc-sailing/maintainers
