@@ -47,9 +47,11 @@ from zoneinfo import ZoneInfo
 API = "https://admiraltyapi.azure-api.net/uktidalapi/api/V1"
 LOCAL_TZ = ZoneInfo("Europe/London")
 CLUB = (51.737, 0.715)   # Heybridge Basin, same as CONFIG.forecast in index.html
-FIELDS = ["Date", "High water", "Tide height (m)", "Station", "First fetched", "Last fetched",
-          "Estimate at first fetch", "Estimate height at first fetch (m)",
+FIELDS = ["Date", "High water", "Tide height (m)", "Other high water", "Other height (m)", "Station",
+          "First fetched", "Last fetched", "Estimate at first fetch", "Estimate height at first fetch (m)",
           "Admiralty high water", "Admiralty height (m)"]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from daytime import choose
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -86,11 +88,10 @@ def fetch_club(url):
         sys.exit("The club tide table's weekdays don't line up with today's date. Not recording anything.")
     out = {}
     for d, (_, am, amh, pm, pmh) in zip(dates, rows):
-        cands = [(t, h) for t, h in ((am, amh), (pm, pmh)) if t != "--:--" and h != "--"]
-        if not cands:
-            continue
-        t, h = min(cands, key=lambda c: abs(int(c[0][:2]) * 60 + int(c[0][3:]) - 12 * 60))
-        out[d.isoformat()] = (t, round(float(h), 2))
+        cands = [(t, round(float(h), 2)) for t, h in ((am, amh), (pm, pmh)) if t != "--:--" and h != "--"]
+        best, alt = choose(d.isoformat(), cands)
+        if best:
+            out[d.isoformat()] = (best[0], best[1], alt)
     return out
 
 
@@ -114,11 +115,12 @@ def daytime_high_waters(events):
         if e.get("EventType") != "HighWater" or e.get("Height") is None or not e.get("DateTime"):
             continue
         local = parse_utc(e["DateTime"]).astimezone(LOCAL_TZ)
-        d = local.strftime("%Y-%m-%d")
-        dist = abs(local.hour * 60 + local.minute - 12 * 60)
-        if d not in by_date or dist < by_date[d][0]:
-            by_date[d] = (dist, local.strftime("%H:%M"), round(float(e["Height"]), 2))
-    return {d: (t, h) for d, (_, t, h) in by_date.items()}
+        by_date.setdefault(local.strftime("%Y-%m-%d"), []).append((local.strftime("%H:%M"), round(float(e["Height"]), 2)))
+    out = {}
+    for d, highs in by_date.items():
+        best, alt = choose(d, highs)
+        out[d] = (best[0], best[1], alt)
+    return out
 
 
 def list_nearest(key, n=8):
@@ -197,7 +199,7 @@ def main():
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     lines = ["| Date | Official HW | Our estimate | Difference |", "| --- | --- | --- | --- |"]
     for d in sorted(official):
-        t, h = official[d]
+        t, h, alt = official[d]
         r = rows.get(d)
         if r is None:
             e = est.get(d)
@@ -205,9 +207,10 @@ def main():
                  "Estimate at first fetch": e[0] if e else "",
                  "Estimate height at first fetch (m)": e[1] if e else ""}
             rows[d] = r
-        r.update({"High water": t, "Tide height (m)": h, "Station": station_label, "Last fetched": now})
+        r.update({"High water": t, "Tide height (m)": h, "Station": station_label, "Last fetched": now,
+                  "Other high water": alt[0] if alt else "", "Other height (m)": alt[1] if alt else ""})
         if d in admiralty and source == "club":
-            r["Admiralty high water"], r["Admiralty height (m)"] = admiralty[d]
+            r["Admiralty high water"], r["Admiralty height (m)"] = admiralty[d][:2]
         if r.get("Estimate at first fetch"):
             eh, em = map(int, r["Estimate at first fetch"].split(":")); oh, om = map(int, t.split(":"))
             diff = (eh * 60 + em) - (oh * 60 + om)
@@ -227,7 +230,7 @@ def main():
     summary("\n".join(lines))
     summary("\nDifferences are our estimate minus the published time.")
     if admiralty and source == "club":
-        both = [(d, official[d], admiralty[d]) for d in sorted(official) if d in admiralty]
+        both = [(d, official[d][:2], admiralty[d][:2]) for d in sorted(official) if d in admiralty]
         if both:
             summary("\n### Club table vs ADMIRALTY\n\n| Date | Club | ADMIRALTY | Time diff | Height diff |\n| --- | --- | --- | --- | --- |")
             for d, (ct, ch), (at, ah) in both:

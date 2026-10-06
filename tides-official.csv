@@ -1,8 +1,8 @@
-Date,High water,Tide height (m),Station,First fetched,Last fetched,Estimate at first fetch,Estimate height at first fetch (m),Admiralty high water,Admiralty height (m)
-2026-10-06,09:34,2.3,BSC pontoon (club table),2026-10-06,2026-10-06,08:50,2.5,,
-2026-10-07,10:53,2.7,BSC pontoon (club table),2026-10-06,2026-10-06,10:10,2.7,,
-2026-10-08,11:51,3.0,BSC pontoon (club table),2026-10-06,2026-10-06,11:13,3.0,,
-2026-10-09,12:37,3.3,BSC pontoon (club table),2026-10-06,2026-10-06,,,,
-2026-10-10,13:18,3.4,BSC pontoon (club table),2026-10-06,2026-10-06,,,,
-2026-10-11,13:54,3.5,BSC pontoon (club table),2026-10-06,2026-10-06,,,,
-2026-10-12,14:28,3.5,BSC pontoon (club table),2026-10-06,2026-10-06,14:10,3.6,,
+Date,High water,Tide height (m),Other high water,Other height (m),Station,First fetched,Last fetched,Estimate at first fetch,Estimate height at first fetch (m),Admiralty high water,Admiralty height (m)
+2026-10-06,09:34,2.3,,,BSC pontoon (club table),2026-10-06,2026-10-06,08:50,2.5,,
+2026-10-07,10:53,2.7,,,BSC pontoon (club table),2026-10-06,2026-10-06,10:10,2.7,,
+2026-10-08,11:51,3.0,,,BSC pontoon (club table),2026-10-06,2026-10-06,11:13,3.0,,
+2026-10-09,12:37,3.3,,,BSC pontoon (club table),2026-10-06,2026-10-06,,,,
+2026-10-10,13:18,3.4,,,BSC pontoon (club table),2026-10-06,2026-10-06,,,,
+2026-10-11,13:54,3.5,,,BSC pontoon (club table),2026-10-06,2026-10-06,,,,
+2026-10-12,14:28,3.5,,,BSC pontoon (club table),2026-10-06,2026-10-06,14:10,3.6,,

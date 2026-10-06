@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-06T15:35:51Z",
+  "generated": "2026-10-06T16:11:50Z",
   "method": "harmonic tide model \u2014 see scripts/tide/TIDES.md",
   "fit_rms_m": 0.118,
   "accuracy_check_against_training_points": {
@@ -117,9 +117,13 @@
     },
     {
       "date": "2026-10-19",
-      "time": "06:08",
+      "time": "19:30",
       "height": 2.2,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "06:08",
+        "height": 2.2
+      }
     },
     {
       "date": "2026-10-20",
@@ -209,7 +213,11 @@
       "date": "2026-11-03",
       "time": "05:50",
       "height": 2.6,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "19:02",
+        "height": 2.5
+      }
     },
     {
       "date": "2026-11-04",
@@ -299,7 +307,11 @@
       "date": "2026-11-18",
       "time": "05:21",
       "height": 2.3,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "18:57",
+        "height": 2.0
+      }
     },
     {
       "date": "2026-11-19",
@@ -383,7 +395,11 @@
       "date": "2026-12-02",
       "time": "18:28",
       "height": 2.5,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "05:21",
+        "height": 2.8
+      }
     },
     {
       "date": "2026-12-03",
@@ -653,7 +669,11 @@
       "date": "2027-01-16",
       "time": "18:19",
       "height": 2.1,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "05:23",
+        "height": 2.6
+      }
     },
     {
       "date": "2027-01-17",
@@ -737,7 +757,11 @@
       "date": "2027-01-30",
       "time": "05:34",
       "height": 2.7,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "18:30",
+        "height": 2.2
+      }
     },
     {
       "date": "2027-01-31",
@@ -1007,7 +1031,11 @@
       "date": "2027-03-16",
       "time": "05:48",
       "height": 2.7,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "18:15",
+        "height": 2.4
+      }
     },
     {
       "date": "2027-03-17",
@@ -1089,9 +1117,13 @@
     },
     {
       "date": "2027-03-30",
-      "time": "06:35",
-      "height": 2.5,
-      "source": "Estimated"
+      "time": "18:49",
+      "height": 2.1,
+      "source": "Estimated",
+      "alt": {
+        "time": "06:35",
+        "height": 2.5
+      }
     },
     {
       "date": "2027-03-31",
@@ -1179,9 +1211,13 @@
     },
     {
       "date": "2027-04-14",
-      "time": "06:24",
-      "height": 2.8,
-      "source": "Estimated"
+      "time": "18:40",
+      "height": 2.6,
+      "source": "Estimated",
+      "alt": {
+        "time": "06:24",
+        "height": 2.8
+      }
     },
     {
       "date": "2027-04-15",
@@ -1269,9 +1305,13 @@
     },
     {
       "date": "2027-04-29",
-      "time": "07:02",
+      "time": "18:55",
       "height": 2.2,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "07:02",
+        "height": 2.2
+      }
     },
     {
       "date": "2027-04-30",
@@ -1353,7 +1393,7 @@
     },
     {
       "date": "2027-05-13",
-      "time": "06:02",
+      "time": "18:12",
       "height": 2.8,
       "source": "Estimated"
     },
@@ -1361,7 +1401,11 @@
       "date": "2027-05-14",
       "time": "07:16",
       "height": 2.6,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "19:29",
+        "height": 2.6
+      }
     },
     {
       "date": "2027-05-15",
@@ -1443,15 +1487,19 @@
     },
     {
       "date": "2027-05-28",
-      "time": "06:09",
-      "height": 2.3,
+      "time": "17:59",
+      "height": 2.4,
       "source": "Estimated"
     },
     {
       "date": "2027-05-29",
       "time": "07:23",
       "height": 2.0,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "19:14",
+        "height": 2.2
+      }
     },
     {
       "date": "2027-05-30",
@@ -1533,9 +1581,13 @@
     },
     {
       "date": "2027-06-12",
-      "time": "06:45",
-      "height": 2.6,
-      "source": "Estimated"
+      "time": "18:58",
+      "height": 2.7,
+      "source": "Estimated",
+      "alt": {
+        "time": "06:45",
+        "height": 2.6
+      }
     },
     {
       "date": "2027-06-13",
@@ -1623,8 +1675,8 @@
     },
     {
       "date": "2027-06-27",
-      "time": "06:19",
-      "height": 2.1,
+      "time": "18:24",
+      "height": 2.4,
       "source": "Estimated"
     },
     {
@@ -1707,8 +1759,8 @@
     },
     {
       "date": "2027-07-11",
-      "time": "06:16",
-      "height": 2.6,
+      "time": "18:30",
+      "height": 2.8,
       "source": "Estimated"
     },
     {
@@ -1803,9 +1855,13 @@
     },
     {
       "date": "2027-07-27",
-      "time": "06:38",
-      "height": 2.1,
-      "source": "Estimated"
+      "time": "19:10",
+      "height": 2.5,
+      "source": "Estimated",
+      "alt": {
+        "time": "06:38",
+        "height": 2.1
+      }
     },
     {
       "date": "2027-07-28",
@@ -1889,7 +1945,11 @@
       "date": "2027-08-10",
       "time": "06:49",
       "height": 2.4,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "19:19",
+        "height": 2.6
+      }
     },
     {
       "date": "2027-08-11",
@@ -1977,8 +2037,8 @@
     },
     {
       "date": "2027-08-25",
-      "time": "05:58",
-      "height": 2.3,
+      "time": "18:37",
+      "height": 2.6,
       "source": "Estimated"
     },
     {
@@ -2061,8 +2121,8 @@
     },
     {
       "date": "2027-09-08",
-      "time": "06:09",
-      "height": 2.4,
+      "time": "18:45",
+      "height": 2.6,
       "source": "Estimated"
     },
     {
@@ -2159,7 +2219,11 @@
       "date": "2027-09-24",
       "time": "06:31",
       "height": 2.4,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "19:34",
+        "height": 2.5
+      }
     },
     {
       "date": "2027-09-25",
@@ -2241,9 +2305,13 @@
     },
     {
       "date": "2027-10-08",
-      "time": "06:24",
-      "height": 2.3,
-      "source": "Estimated"
+      "time": "19:28",
+      "height": 2.4,
+      "source": "Estimated",
+      "alt": {
+        "time": "06:24",
+        "height": 2.3
+      }
     },
     {
       "date": "2027-10-09",
@@ -2331,9 +2399,13 @@
     },
     {
       "date": "2027-10-23",
-      "time": "06:02",
-      "height": 2.7,
-      "source": "Estimated"
+      "time": "19:03",
+      "height": 2.6,
+      "source": "Estimated",
+      "alt": {
+        "time": "06:02",
+        "height": 2.7
+      }
     },
     {
       "date": "2027-10-24",
@@ -2423,7 +2495,11 @@
       "date": "2027-11-07",
       "time": "05:32",
       "height": 2.3,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "19:08",
+        "height": 2.1
+      }
     },
     {
       "date": "2027-11-08",
@@ -2513,7 +2589,11 @@
       "date": "2027-11-22",
       "time": "05:46",
       "height": 2.7,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "18:59",
+        "height": 2.5
+      }
     },
     {
       "date": "2027-11-23",
@@ -2687,7 +2767,11 @@
       "date": "2027-12-21",
       "time": "18:23",
       "height": 2.4,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "05:20",
+        "height": 2.8
+      }
     },
     {
       "date": "2027-12-22",
@@ -2777,7 +2861,11 @@
       "date": "2028-01-05",
       "time": "18:04",
       "height": 2.0,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "05:00",
+        "height": 2.5
+      }
     },
     {
       "date": "2028-01-06",
@@ -2957,7 +3045,11 @@
       "date": "2028-02-04",
       "time": "18:21",
       "height": 2.0,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "05:35",
+        "height": 2.5
+      }
     },
     {
       "date": "2028-02-05",
@@ -3041,7 +3133,11 @@
       "date": "2028-02-18",
       "time": "05:42",
       "height": 2.8,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "18:27",
+        "height": 2.3
+      }
     },
     {
       "date": "2028-02-19",
@@ -3311,7 +3407,11 @@
       "date": "2028-04-03",
       "time": "06:52",
       "height": 2.5,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "19:08",
+        "height": 2.4
+      }
     },
     {
       "date": "2028-04-04",
@@ -3395,7 +3495,11 @@
       "date": "2028-04-17",
       "time": "06:55",
       "height": 2.5,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "19:05",
+        "height": 2.3
+      }
     },
     {
       "date": "2028-04-18",
@@ -3483,7 +3587,7 @@
     },
     {
       "date": "2028-05-02",
-      "time": "06:24",
+      "time": "18:34",
       "height": 2.6,
       "source": "Estimated"
     },
@@ -3567,15 +3671,19 @@
     },
     {
       "date": "2028-05-16",
-      "time": "06:15",
-      "height": 2.5,
+      "time": "18:12",
+      "height": 2.4,
       "source": "Estimated"
     },
     {
       "date": "2028-05-17",
       "time": "07:32",
       "height": 2.2,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "19:26",
+        "height": 2.2
+      }
     },
     {
       "date": "2028-05-18",
@@ -3657,15 +3765,19 @@
     },
     {
       "date": "2028-05-31",
-      "time": "05:59",
-      "height": 2.7,
+      "time": "18:08",
+      "height": 2.8,
       "source": "Estimated"
     },
     {
       "date": "2028-06-01",
       "time": "07:12",
       "height": 2.5,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "19:26",
+        "height": 2.7
+      }
     },
     {
       "date": "2028-06-02",
@@ -3747,8 +3859,8 @@
     },
     {
       "date": "2028-06-15",
-      "time": "06:32",
-      "height": 2.2,
+      "time": "18:24",
+      "height": 2.4,
       "source": "Estimated"
     },
     {
@@ -3837,9 +3949,13 @@
     },
     {
       "date": "2028-06-30",
-      "time": "06:40",
-      "height": 2.5,
-      "source": "Estimated"
+      "time": "18:58",
+      "height": 2.8,
+      "source": "Estimated",
+      "alt": {
+        "time": "06:40",
+        "height": 2.5
+      }
     },
     {
       "date": "2028-07-01",
@@ -3927,9 +4043,13 @@
     },
     {
       "date": "2028-07-15",
-      "time": "06:36",
-      "height": 2.0,
-      "source": "Estimated"
+      "time": "18:49",
+      "height": 2.4,
+      "source": "Estimated",
+      "alt": {
+        "time": "06:36",
+        "height": 2.0
+      }
     },
     {
       "date": "2028-07-16",
@@ -4011,8 +4131,8 @@
     },
     {
       "date": "2028-07-29",
-      "time": "06:11",
-      "height": 2.6,
+      "time": "18:32",
+      "height": 2.9,
       "source": "Estimated"
     },
     {
@@ -4109,7 +4229,11 @@
       "date": "2028-08-14",
       "time": "06:42",
       "height": 2.0,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "19:30",
+        "height": 2.4
+      }
     },
     {
       "date": "2028-08-15",
@@ -4193,7 +4317,11 @@
       "date": "2028-08-28",
       "time": "06:46",
       "height": 2.4,
-      "source": "Estimated"
+      "source": "Estimated",
+      "alt": {
+        "time": "19:27",
+        "height": 2.7
+      }
     },
     {
       "date": "2028-08-29",
@@ -4281,8 +4409,8 @@
     },
     {
       "date": "2028-09-12",
-      "time": "05:55",
-      "height": 2.3,
+      "time": "18:48",
+      "height": 2.5,
       "source": "Estimated"
     },
     {
@@ -4365,9 +4493,13 @@
     },
     {
       "date": "2028-09-26",
-      "time": "06:09",
-      "height": 2.5,
-      "source": "Estimated"
+      "time": "18:56",
+      "height": 2.7,
+      "source": "Estimated",
+      "alt": {
+        "time": "06:09",
+        "height": 2.5
+      }
     },
     {
       "date": "2028-09-27",

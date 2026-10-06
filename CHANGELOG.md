@@ -2,6 +2,13 @@
 
 Version numbers are in `CONFIG.version` in `index.html` and `VERSION` in `sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**.
 
+## 2.16.4 – 6 Oct 2026
+- Sunrise and sunset for Heybridge Basin, worked out on the device for any date (no data feed, works offline): a **Daylight** section in each day's details, a line in Tides & Weather, and SUNSET on the GO SAIL screen. Notes when high water falls after sunset or before sunrise.
+
+## 2.16.3 – 6 Oct 2026
+- Which high water to show is now the one nearest solar noon (13:00 in summer, 12:00 in winter) rather than 12:00 all year, so the choice no longer flips between morning and evening from one day to the next (19 Oct showed 06:08 after 18 Oct's 18:02; it now shows 19:30).
+- When a day's two high waters are about equally far from midday (roughly 6 am and 6 pm, a few days a month), both are shown: in the day's details, and as "19:30 & 06:08" in Tides & Weather.
+
 ## 2.16.2 – 6 Oct 2026
 - `sync-release.sh` does the whole release from a downloaded `bsc-sailing-app.zip`: fast-forwards if GitHub is ahead, reads the version from the zip's `release-manifest.json` and checks `index.html`, `sw.js` and `CHANGELOG.md` all agree, refuses an older zip unless you insist, warns before overwriting anything changed on GitHub since the release was built, updates itself if the zip has a newer copy, and moves the applied zip to `~/Downloads/bsc-sailing-app-applied/`.
 

@@ -453,7 +453,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
    only needs a new programme.csv (same column headings).
 ------------------------------------------------------------------ */
 const CONFIG = {
-  version: "2.16.2", released: "2026-10-06",   // bump both here and in sw.js, and add a line to CHANGELOG.md
+  version: "2.16.4", released: "2026-10-06",   // bump both here and in sw.js, and add a line to CHANGELOG.md
   filePattern: "programme-{year}.csv",  // one file per season: programme-2026.csv, programme-2027.csv, ...
   yearsBack: 1, yearsAhead: 2,          // which years to look for around the current year
   legacyFile: "programme.csv",          // an older single file: used for its own year if no dated file covers it
@@ -518,6 +518,44 @@ let VOCAB = [];
 const EXTRA_NOTE = "Added after the printed programme";
 const FORECAST_NOTE_DEFAULT = "Tide from published predictions, not an estimate.";
 function forecastNote() { return (TIDES && TIDES.forecast_note) || FORECAST_NOTE_DEFAULT; }
+/* ---------- sunrise and sunset ----------
+   Worked out on the device for CONFIG.forecast (Heybridge Basin), so it covers
+   any date and works offline. The standard sunrise equation (as NOAA and most
+   almanacs use, including refraction), good to about a minute. */
+const sunCache = new Map();
+function sunTimes(iso) {
+  if (sunCache.has(iso)) return sunCache.get(iso);
+  const [y, m, d] = iso.split("-").map(Number);
+  const rad = Math.PI / 180, lat = CONFIG.forecast.lat, lon = CONFIG.forecast.lon;
+  const n = Math.round(Date.UTC(y, m - 1, d, 12) / DAY + 2440587.5 - 2451545);
+  const Js = n - lon / 360;
+  const M = ((357.5291 + 0.98560028 * Js) % 360) * rad;
+  const C = 1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M);
+  const lam = ((M / rad + C + 180 + 102.9372) % 360) * rad;
+  const Jt = 2451545 + Js + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * lam);
+  const dec = Math.asin(Math.sin(lam) * Math.sin(23.4397 * rad));
+  const cw = (Math.sin(-0.833 * rad) - Math.sin(lat * rad) * Math.sin(dec)) / (Math.cos(lat * rad) * Math.cos(dec));
+  const w = Math.acos(Math.max(-1, Math.min(1, cw))) / rad;
+  const fmt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Europe/London" });
+  const at = j => fmt.format(new Date((j - 2440587.5) * DAY));
+  const out = { rise: at(Jt - w / 360), set: at(Jt + w / 360), minutes: Math.round(2 * w / 360 * 1440) };
+  sunCache.set(iso, out);
+  return out;
+}
+function hhmm(t) { return parseInt(t.slice(0, 2), 10) * 60 + parseInt(t.slice(3, 5), 10); }
+// "Sunrise 07:05 · Sunset 18:24 · 11 h 19 min of daylight", plus a note when high water is in the dark
+function sunLine(iso, hw) {
+  const s = sunTimes(iso);
+  let t = "Sunrise " + s.rise + " · Sunset " + s.set + " · " + Math.floor(s.minutes / 60) + " h " + (s.minutes % 60) + " min of daylight";
+  if (hw && /^\d\d:\d\d$/.test(hw)) {
+    if (hhmm(hw) > hhmm(s.set)) t += ". High water is after sunset.";
+    else if (hhmm(hw) < hhmm(s.rise)) t += ". High water is before sunrise.";
+  }
+  return t;
+}
+
+// Two high waters about equally far from midday (roughly 6 am and 6 pm): both are shown.
+function altText(alt, est) { return "Also high water at " + (est ? "≈" : "") + alt.time + " (" + Number(alt.height).toFixed(1) + " m). The two are about equally far from midday, so both are shown."; }
 function tideRefByDate() {
   const m = new Map();
   if (TIDES && Array.isArray(TIDES.tides)) TIDES.tides.forEach(t => m.set(t.date, t));
@@ -551,7 +589,7 @@ function buildData(records, year) {
     d.tideSrc = d.hw ? (d.est ? "Estimated" : "Programme") : "";
     if (d.tideSrc === "Programme") return;
     const t = ref.get(d.iso); if (!t || !/^\d\d:\d\d$/.test(t.time)) return;
-    d.hw = t.time; d.ht = Number(t.height); d.tideSrc = t.source; d.est = t.source === "Estimated";
+    d.hw = t.time; d.ht = Number(t.height); d.tideSrc = t.source; d.est = t.source === "Estimated"; d.alt = t.alt || null;
   });
   const fl = new Map();
   records.forEach(r => { const f = r["Fleet"], o = parseInt(r["Race start order"], 10) || 0; if (!f || !o) return; if (!fl.has(f)) fl.set(f, { order: o, idx: fl.size }); else if (o < fl.get(f).order) fl.get(f).order = o; });
@@ -1082,6 +1120,7 @@ function openSail(course, forDay) {
   const quick = $("sail-quick"); quick.textContent = "";
   quick.appendChild(el("span", "", "START: ")); quick.appendChild(el("b", "", st || "n/a"));
   quick.appendChild(el("span", "", "   HW: ")); quick.appendChild(el("b", "", hwText || "n/a"));
+  quick.appendChild(el("span", "", "   SUNSET: ")); quick.appendChild(el("b", "", sunTimes(forDay ? forDay.iso : isoOf(today)).set));
   if (forDay && !isToday(forDay)) quick.appendChild(el("span", "", "   (" + fmtShort.format(forDay.date) + ")"));
   const ul = $("sail-list"); ul.textContent = "";
   course.marks.forEach((m, i) => {
@@ -1194,6 +1233,8 @@ function renderTideDetail(iso, tideByDate) {
       const f = el("div", ""); f.appendChild(el("b", "", v)); f.appendChild(el("span", "", l)); nums.appendChild(f);
     });
     box.appendChild(nums);
+    if (rec.alt) box.appendChild(el("p", "muted", altText(rec.alt, est)));
+    box.appendChild(el("p", "", sunLine(iso, rec.time)));
   } else {
     box.appendChild(el("p", "muted", "No tide estimate for this date."));
   }
@@ -1300,7 +1341,7 @@ async function renderTidesScreen() {
     const li = document.createElement("li");
     const btn = document.createElement("button"); btn.type = "button"; btn.dataset.iso = iso;
     btn.appendChild(el("span", "tl-date", (i === 0 ? "Today, " : i === 1 ? "Tomorrow, " : "") + fmtShort.format(dt)));
-    btn.appendChild(el("span", "tl-tide", (rec.source === "Estimated" ? "≈" : "") + rec.time + " · " + rec.height.toFixed(1) + " m"));
+    btn.appendChild(el("span", "tl-tide", (rec.source === "Estimated" ? "≈" : "") + rec.time + (rec.alt ? " & " + rec.alt.time : "") + " · " + rec.height.toFixed(1) + " m"));
     btn.addEventListener("click", () => selectTideDate(iso, tideByDate));
     li.appendChild(btn); list.appendChild(li);
   }
@@ -1466,6 +1507,9 @@ function fillSheet() {
   body.appendChild(el("h3", "", "Weather Forecast"));
   const wxBox = el("div", ""); wxBox.id = "sheet-wx"; body.appendChild(wxBox); fillWeather();
 
+  body.appendChild(el("h3", "", "Daylight"));
+  body.appendChild(el("p", "", sunLine(day.iso, day.hw)));
+
   if (day.hw || !isNaN(day.ht)) {
     body.appendChild(el("h3", "", "Tide"));
     const nums = el("div", "tide-nums");
@@ -1474,6 +1518,7 @@ function fillSheet() {
     });
     body.appendChild(nums);
     if (day.est && day.hw) body.appendChild(el("p", "muted", "≈ This tide isn't printed in the programme, so it's an estimate."));
+    if (day.alt) body.appendChild(el("p", "muted", altText(day.alt, day.est)));
     if (day.tideSrc === "Forecast") body.appendChild(el("p", "muted", forecastNote()));
     if (!isNaN(day.ht)) {
       const sc = el("div", "scale"); const fill = document.createElement("i");

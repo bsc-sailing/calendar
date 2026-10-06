@@ -4,8 +4,7 @@ tide_predict.py — use a model fitted by tidefit.py to estimate high water
 for a date the club's programme doesn't cover.
 
 This finds every local high-water peak in the target day (usually two) and
-returns the one closest to --near (default midday, since the sailing
-programme's own high waters are always the daytime one). It does NOT
+returns the daytime one (see daytime.py), or the one closest to --near. It does NOT
 extrapolate indefinitely — the further a date is from the training window
 (see tide-model.json's training_date_range), the less this should be
 trusted; see README.md ("Adding a new season") for how this fits into the
@@ -27,6 +26,10 @@ from zoneinfo import ZoneInfo
 
 LOCAL_TZ = ZoneInfo("Europe/London")   # dates and times in and out are UK clock time
 
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from daytime import choose
+
 
 def load_model(path):
     m = json.load(open(path))
@@ -44,29 +47,40 @@ def height_at(model, t_hours):
     return h
 
 
-def predict_day(model, date_str, near="12:00", step_minutes=1):
+def day_peaks(model, date_str, step_minutes=1):
+    """Every high water in the UK calendar day, as [(HH:MM, height)], in time order."""
     day0 = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=LOCAL_TZ).astimezone(timezone.utc)
+    day1 = (datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=LOCAL_TZ) + timedelta(days=1)).astimezone(timezone.utc)
     t0 = (day0 - model["epoch_dt"]).total_seconds() / 3600.0
-    n = int(24 * 60 / step_minutes) + 1
+    hours = (day1 - day0).total_seconds() / 3600.0          # 23 or 25 on clock-change days
+    n = int(hours * 60 / step_minutes) + 1
     t = t0 + np.arange(n) * (step_minutes / 60.0)
     h = height_at(model, t)
-    # local maxima: a point higher than both neighbours
     is_peak = np.r_[False, (h[1:-1] > h[:-2]) & (h[1:-1] > h[2:]), False]
-    peak_idx = np.where(is_peak)[0]
-    if len(peak_idx) == 0:
+    out = []
+    for i in np.where(is_peak)[0]:
+        pt = (model["epoch_dt"] + timedelta(hours=float(t[i]))).astimezone(LOCAL_TZ)
+        out.append((pt.strftime("%H:%M"), round(float(h[i]), 1)))
+    return out
+
+
+def predict_day(model, date_str, near=None, step_minutes=1):
+    """The high water to show for a date: with near=HH:MM, the one closest to that
+    time; otherwise the daytime rule in daytime.py (nearest solar noon)."""
+    peaks = day_peaks(model, date_str, step_minutes)
+    if not peaks:
         return None
-    near_dt = datetime.strptime(date_str + " " + near, "%Y-%m-%d %H:%M").replace(tzinfo=LOCAL_TZ).astimezone(timezone.utc)
-    near_t = (near_dt - model["epoch_dt"]).total_seconds() / 3600.0
-    best = peak_idx[np.argmin(np.abs(t[peak_idx] - near_t))]
-    peak_time = (model["epoch_dt"] + timedelta(hours=float(t[best]))).astimezone(LOCAL_TZ)
-    return peak_time.strftime("%H:%M"), round(float(h[best]), 1)
+    if near:
+        n = int(near[:2]) * 60 + int(near[3:5])
+        return min(peaks, key=lambda p: abs(int(p[0][:2]) * 60 + int(p[0][3:]) - n))
+    return choose(date_str, peaks)[0]
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("model")
     ap.add_argument("date", nargs="?")
-    ap.add_argument("--near", default="12:00")
+    ap.add_argument("--near", default=None, help="HH:MM to pick the high water nearest; default is the daytime rule (daytime.py)")
     ap.add_argument("--dates-from")
     ap.add_argument("--fill-csv", help="A programme-YYYY.csv to fill blank tide rows in directly, once per unique date.")
     ap.add_argument("--out")
@@ -78,7 +92,7 @@ def main():
         rows = list(csv.DictReader(open(args.dates_from, encoding="utf-8-sig")))
         out_rows = []
         for r in rows:
-            res = predict_day(model, r["Date"], near=r.get("Near", "12:00") or "12:00")
+            res = predict_day(model, r["Date"], near=r.get("Near") or None)
             hw, ht = res if res else ("", "")
             out_rows.append({"Date": r["Date"], "High water": hw, "Tide height (m)": ht})
         with open(args.out or "estimates.csv", "w", newline="") as f:

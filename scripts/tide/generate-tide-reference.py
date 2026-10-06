@@ -30,7 +30,8 @@ from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(__file__))
 from tidefit import fit, hours_since_epoch, EPOCH, CONSTITUENTS
-from tide_predict import height_at, predict_day
+from tide_predict import height_at, predict_day, day_peaks
+from daytime import choose
 
 
 def load_all_programme_points(repo_root):
@@ -133,10 +134,13 @@ def main():
     offset = station_offset(official, real_prog, int(cfg.get("min_overlap_days", 3))) if official else None
     # Official points join the training data only once the station offset is
     # known, and never on a date the programme already prints.
-    official_used = {}
+    official_used, official_alt = {}, {}
     if offset and offset["known"]:
         for r in official:
             if r["Date"] not in real_prog:
+                if r.get("Other high water") and r.get("Other height (m)"):
+                    a_hw, a_ht = adjusted({"High water": r["Other high water"], "Tide height (m)": r["Other height (m)"]}, offset)
+                    official_alt[r["Date"]] = {"time": a_hw, "height": a_ht}
                 hw, ht = adjusted(r, offset)
                 official_used[r["Date"]] = (hw, ht)
                 points.append((hours_since_epoch(r["Date"], hw), ht, r["Date"], hw))
@@ -171,13 +175,19 @@ def main():
             n_real += 1
         elif show_official and date_str in official_used:
             hw, ht = official_used[date_str]
-            tides.append({"date": date_str, "time": hw, "height": ht, "source": "Forecast"})
+            rec = {"date": date_str, "time": hw, "height": ht, "source": "Forecast"}
+            if date_str in official_alt:
+                rec["alt"] = official_alt[date_str]
+            tides.append(rec)
             n_real += 1
         else:
-            res = predict_day(model, date_str)
-            if res:
-                hw, ht = res
-                tides.append({"date": date_str, "time": hw, "height": ht, "source": "Estimated"})
+            best, alt = choose(date_str, day_peaks(model, date_str))
+            if best:
+                hw, ht = best
+                rec = {"date": date_str, "time": hw, "height": ht, "source": "Estimated"}
+                if alt:   # two high waters about equally far from midday: show both
+                    rec["alt"] = {"time": alt[0], "height": alt[1]}
+                tides.append(rec)
                 n_modelled += 1
         d += timedelta(days=1)
 
