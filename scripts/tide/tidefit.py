@@ -60,6 +60,14 @@ import numpy as np
 # result from including near-duplicate frequencies with sparse, peaks-only
 # data. See the comment above CONSTITUENTS for the full explanation.
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+
+# Programme times are UK clock time (GMT in winter, BST in summer). The tide
+# itself doesn't observe daylight saving, so every time is converted to UTC
+# before fitting and back to UK clock time after predicting. (Until v2.16.0
+# the clock time was fed in as if it were UTC, which put a one-hour step into
+# the data at each clock change and roughly doubled the timing error.)
+LOCAL_TZ = ZoneInfo("Europe/London")
 
 EPOCH = datetime(2026, 1, 1, tzinfo=timezone.utc)
 
@@ -82,8 +90,9 @@ CONSTITUENTS = {
 
 
 def hours_since_epoch(date_str: str, time_str: str) -> float:
-    d = datetime.strptime(date_str + " " + time_str, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
-    return (d - EPOCH).total_seconds() / 3600.0
+    """Hours since EPOCH for a UK clock time (GMT or BST, whichever applied that day)."""
+    d = datetime.strptime(date_str + " " + time_str, "%Y-%m-%d %H:%M").replace(tzinfo=LOCAL_TZ)
+    return (d.astimezone(timezone.utc) - EPOCH).total_seconds() / 3600.0
 
 
 def load_known_points(csv_path):

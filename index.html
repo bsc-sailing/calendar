@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BSC Sailing Calendar app, version 2.15.4 (2026-10-02) -->
+<!-- BSC Sailing Calendar app, version 2.15.3 (2026-10-01) -->
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
@@ -80,6 +80,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .tok .t { color: var(--water); font-weight: 700; }
 .tok .f { color: var(--muted); font-size: 0.85rem; }
 .tok .tag { font-size: 0.72rem; font-weight: 700; padding: 0 6px; border-radius: 3px; background: var(--water-soft); color: var(--ink); }
+.tok .tag.extra { background: transparent; border: 1px solid var(--line); color: var(--muted); font-weight: 400; }
 .tok.event .lbl { font-weight: 700; }
 .tok.train .num { background: var(--gold); color: var(--bg); }
 .badge { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 1px 8px; border-radius: 3px; margin-right: 6px; }
@@ -328,8 +329,6 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
   dialog#sheet { margin: auto; border-radius: 10px; }
 }
 </style>
-<!-- GoatCounter: privacy-friendly page counts, no cookies or personal data (https://www.goatcounter.com) -->
-<script data-goatcounter="https://jf-bsc-calendar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -454,10 +453,11 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
    only needs a new programme.csv (same column headings).
 ------------------------------------------------------------------ */
 const CONFIG = {
-  version: "2.15.4", released: "2026-10-02",   // bump both here and in sw.js, and add a line to CHANGELOG.md
+  version: "2.16.2", released: "2026-10-06",   // bump both here and in sw.js, and add a line to CHANGELOG.md
   filePattern: "programme-{year}.csv",  // one file per season: programme-2026.csv, programme-2027.csv, ...
   yearsBack: 1, yearsAhead: 2,          // which years to look for around the current year
   legacyFile: "programme.csv",          // an older single file: used for its own year if no dated file covers it
+  extrasPattern: "extras-{year}.csv",   // dates added after the printed programme (see README, "Extra dates"); merged into that season
   name: "BSC Sailing Calendar",
   venue: "Blackwater Sailing Club, Heybridge Basin, Maldon",   // location on calendar entries
   defaultMinutes: 180,                                         // length of a timed calendar entry when no finish time is given
@@ -509,10 +509,20 @@ function parseCSV(text) {
 }
 
 /* ---------- data ---------- */
+let TIDES = null;   // tides.json, loaded before the first render (see start())
 let DAYS = [], FLEETS = [], MIN_H = 2, MAX_H = 4, BIG_TIDE = 3.4, YEAR = now.getFullYear();
 let SEASONS = [], SEASON = null, seasonFinished = false;
 const state = { month: "all", chip: "all", preset: null, fleets: [] };   // fleets: [] means all fleets
 let VOCAB = [];
+
+const EXTRA_NOTE = "Added after the printed programme";
+const FORECAST_NOTE_DEFAULT = "Tide from published predictions, not an estimate.";
+function forecastNote() { return (TIDES && TIDES.forecast_note) || FORECAST_NOTE_DEFAULT; }
+function tideRefByDate() {
+  const m = new Map();
+  if (TIDES && Array.isArray(TIDES.tides)) TIDES.tides.forEach(t => m.set(t.date, t));
+  return m;
+}
 
 function buildData(records, year) {
   const map = new Map();
@@ -520,7 +530,7 @@ function buildData(records, year) {
     const rec = {
       date: r["Date"], hw: r["High water"], ht: parseFloat(r["Tide height (m)"]), src: r["Tide source"], start: r["Start time"],
       fleet: r["Fleet"], order: parseInt(r["Race start order"], 10) || 0, event: r["Event"], training: r["Training"],
-      gp: /^true$/i.test(r["GP weekend"] || r["Grand Prix weekend"] || ""), series: r["Race / series"], nums: r["Race no(s)"], detail: r["Detail"]
+      gp: /^true$/i.test(r["GP weekend"] || r["Grand Prix weekend"] || ""), series: r["Race / series"], nums: r["Race no(s)"], detail: r["Detail"], extra: !!r._extra
     };
     if (!/^\d{4}-\d\d-\d\d$/.test(rec.date)) continue;
     let d = map.get(rec.date);
@@ -533,6 +543,16 @@ function buildData(records, year) {
     d.rows.push(rec);
   }
   DAYS = [...map.values()].sort((a, b) => a.date - b.date);
+  // A printed (Programme) tide always wins. For any other day, the rolling tide
+  // reference (tides.json, refitted as more data arrives) is newer than whatever
+  // snapshot was typed into the CSV, so use it where it covers the date.
+  const ref = tideRefByDate();
+  DAYS.forEach(d => {
+    d.tideSrc = d.hw ? (d.est ? "Estimated" : "Programme") : "";
+    if (d.tideSrc === "Programme") return;
+    const t = ref.get(d.iso); if (!t || !/^\d\d:\d\d$/.test(t.time)) return;
+    d.hw = t.time; d.ht = Number(t.height); d.tideSrc = t.source; d.est = t.source === "Estimated";
+  });
   const fl = new Map();
   records.forEach(r => { const f = r["Fleet"], o = parseInt(r["Race start order"], 10) || 0; if (!f || !o) return; if (!fl.has(f)) fl.set(f, { order: o, idx: fl.size }); else if (o < fl.get(f).order) fl.get(f).order = o; });
   records.forEach(r => { const f = r["Fleet"]; if (f && !fl.has(f)) fl.set(f, { order: 99, idx: fl.size }); });
@@ -569,7 +589,7 @@ function groupDay(day, opts) {
     if (r.event === "No racing") { noRacing = true; continue; }
     if (r.training) {
       const k = r.training + "|" + r.event + "|" + r.start + "|" + r.detail;
-      if (!train.has(k)) train.set(k, { kind: "train", label: r.training, tag: r.event, start: r.start, detail: r.detail });
+      if (!train.has(k)) train.set(k, { kind: "train", label: r.training, tag: r.event, start: r.start, detail: r.detail, extra: r.extra });
       continue;
     }
     if (r.order) {
@@ -580,7 +600,7 @@ function groupDay(day, opts) {
     }
     if (r.event) {
       const k = [r.event, r.series, r.start, r.detail].join("|");
-      if (!evs.has(k)) evs.set(k, { kind: "event", label: r.series || r.event, tag: r.series ? r.event : "", start: r.start, detail: r.detail, fleets: [] });
+      if (!evs.has(k)) evs.set(k, { kind: "event", label: r.series || r.event, tag: r.series ? r.event : "", start: r.start, detail: r.detail, fleets: [], extra: r.extra });
       if (r.fleet) evs.get(k).fleets.push(r.fleet);
     }
   }
@@ -646,11 +666,13 @@ function tokenEl(item) {
     if (item.tag) t.appendChild(el("span", "tag", item.tag));
     if (item.start) t.appendChild(el("span", "t", item.start === "TBC" ? "start TBC" : item.start));
     if (item.fleets.length) t.appendChild(el("span", "f", fleetsText(item.fleets)));
+    if (item.extra) t.appendChild(el("span", "tag extra", "Extra"));
   } else {
     t.appendChild(el("span", "fl", "Training:"));
     t.appendChild(el("span", "lbl", item.label));
     if (item.tag) t.appendChild(el("span", "tag", item.tag));
     t.appendChild(el("span", "t", item.start === "TBC" || !item.start ? "start TBC" : item.start));
+    if (item.extra) t.appendChild(el("span", "tag extra", "Extra"));
   }
   return t;
 }
@@ -1130,7 +1152,6 @@ async function renderEvents() {
     list.appendChild(li);
   });
 }
-let TIDES = null;
 async function loadTides() {
   if (TIDES !== null) return TIDES;
   try {
@@ -1215,6 +1236,7 @@ function renderTideDetail(iso, tideByDate) {
   } else if (est) {
     box.appendChild(el("p", "wx-credit", "≈ This tide isn't printed in the programme, so it's an estimate."));
   }
+  if (rec && rec.source === "Forecast") box.appendChild(el("p", "wx-credit", forecastNote()));
 
   const day = DAYS.find(d => d.iso === iso);
   if (day) {
@@ -1430,14 +1452,14 @@ function fillSheet() {
     g.events.forEach(i => {
       const time = i.start ? (i.start === "TBC" ? "start TBC" : i.start) : "";
       if (isBJRC(i)) ul.appendChild(listRow("BJRC", i.label.replace(/^BJRC\s*/, ""), i.detail, time, false));
-      else ul.appendChild(listRow("", i.label + (i.tag ? " (" + i.tag + ")" : ""), [i.fleets.length ? fleetsText(i.fleets) : "", i.detail].filter(Boolean).join(" · "), time, false));
+      else ul.appendChild(listRow("", i.label + (i.tag ? " (" + i.tag + ")" : ""), [i.fleets.length ? fleetsText(i.fleets) : "", i.detail, i.extra ? EXTRA_NOTE : ""].filter(Boolean).join(" · "), time, false));
     });
     body.appendChild(ul);
   }
   if (g.training.length) {
     body.appendChild(el("h3", "", "Training"));
     const ul = el("ul", "list");
-    g.training.forEach(i => ul.appendChild(listRow("", i.label + (i.tag ? " (" + i.tag + ")" : ""), i.detail, i.start === "TBC" || !i.start ? "start TBC" : i.start, false)));
+    g.training.forEach(i => ul.appendChild(listRow("", i.label + (i.tag ? " (" + i.tag + ")" : ""), [i.detail, i.extra ? EXTRA_NOTE : ""].filter(Boolean).join(" · "), i.start === "TBC" || !i.start ? "start TBC" : i.start, false)));
     body.appendChild(ul);
   }
 
@@ -1452,6 +1474,7 @@ function fillSheet() {
     });
     body.appendChild(nums);
     if (day.est && day.hw) body.appendChild(el("p", "muted", "≈ This tide isn't printed in the programme, so it's an estimate."));
+    if (day.tideSrc === "Forecast") body.appendChild(el("p", "muted", forecastNote()));
     if (!isNaN(day.ht)) {
       const sc = el("div", "scale"); const fill = document.createElement("i");
       fill.style.width = Math.max(4, ((day.ht - MIN_H) / (MAX_H - MIN_H || 1)) * 100) + "%"; sc.appendChild(fill);
@@ -1562,6 +1585,13 @@ async function fetchSeason(url, year) {
     return { year: year || Number(dates[0].slice(0, 4)), records, first: parseISO(dates[0]), last: parseISO(dates[dates.length - 1]), modified: res.headers.get("last-modified") || "" };
   } catch (e) { return null; }
 }
+async function fetchExtras(year) {
+  try {
+    const res = await fetch(CONFIG.extrasPattern.replace("{year}", year), { cache: "no-cache" });
+    if (!res.ok) return [];
+    return parseCSV(await res.text()).map(r => Object.assign(r, { _extra: true }));
+  } catch (e) { return []; }
+}
 function pickSeason() { return SEASONS.find(x => x.last >= today) || SEASONS[SEASONS.length - 1]; }
 
 function activateSeason(s) {
@@ -1580,7 +1610,7 @@ async function renderSupport() {
   const ul = $("supportList"); ul.textContent = "";
   const add = t => ul.appendChild(el("li", "", t));
   add("App version: " + CONFIG.version + ", released " + CONFIG.released);
-  add("Seasons loaded: " + SEASONS.map(x => x.year + " (" + x.records.length + " rows" + (x.modified && !isNaN(new Date(x.modified)) ? ", file updated " + shortDate(new Date(x.modified)) : "") + ")").join("; "));
+  add("Seasons loaded: " + SEASONS.map(x => x.year + " (" + x.records.length + " rows" + (x.nExtra ? ", " + x.nExtra + " from extras-" + x.year + ".csv" : "") + (x.modified && !isNaN(new Date(x.modified)) ? ", file updated " + shortDate(new Date(x.modified)) : "") + ")").join("; "));
   add("Showing: " + YEAR + (seasonFinished ? " (finished season)" : ""));
   add("Offline copy: " + (navigator.serviceWorker && navigator.serviceWorker.controller ? "active" : "not active yet"));
   try { const keys = (await caches.keys()).filter(k => k.startsWith("bsc-sailing")); add("Saved copy: " + (keys.join(", ") || "none")); } catch (e) {}
@@ -1619,6 +1649,7 @@ function showChecks() {
   const ul = el("ul", "");
   ul.appendChild(el("li", "", recs.length + " rows, " + DAYS.length + " days, " + fmtShort.format(SEASON.first) + " to " + fmtShort.format(SEASON.last) + " " + SEASON.last.getFullYear()));
   ul.appendChild(el("li", "", "Fleets: " + (FLEETS.join(", ") || "none")));
+  if (SEASON.nExtra) ul.appendChild(el("li", "", SEASON.nExtra + " extra row(s) from extras-" + SEASON.year + ".csv"));
   if (!out.length) ul.appendChild(el("li", "", "No problems found."));
   out.forEach(([bad, txt]) => ul.appendChild(el("li", bad ? "bad" : "", txt)));
   box.textContent = ""; box.append(t, ul); box.hidden = false;
@@ -1629,10 +1660,22 @@ async function start() {
   const y0 = now.getFullYear(), tries = [];
   for (let y = y0 - CONFIG.yearsBack; y <= y0 + CONFIG.yearsAhead; y++) tries.push(fetchSeason(CONFIG.filePattern.replace("{year}", y), y));
   tries.push(fetchSeason(CONFIG.legacyFile, 0));
-  const found = (await Promise.all(tries)).filter(Boolean);
+  const [found0] = await Promise.all([Promise.all(tries), loadTides()]);
+  const found = found0.filter(Boolean);
   const seen = new Map();                                    // a dated file wins over the old single file for the same year
   found.forEach(x => { if (!seen.has(x.year)) seen.set(x.year, x); });
   SEASONS = [...seen.values()].sort((a, b) => a.year - b.year);
+  // Extra dates (extras-YEAR.csv) join the season for their year. They're kept as
+  // a separate file so re-exporting the printed programme never wipes them.
+  await Promise.all(SEASONS.map(async s => {
+    const extra = await fetchExtras(s.year);
+    s.nExtra = extra.length;
+    if (!extra.length) return;
+    s.records = s.records.concat(extra);
+    const dates = extra.map(r => r["Date"]).filter(d => /^\d{4}-\d\d-\d\d$/.test(d)).sort();
+    if (dates.length && parseISO(dates[dates.length - 1]) > s.last) s.last = parseISO(dates[dates.length - 1]);
+    if (dates.length && parseISO(dates[0]) < s.first) s.first = parseISO(dates[0]);
+  }));
   if (!SEASONS.length) {
     const box = $("list"); box.textContent = "";
     const p = el("div", "empty", "The programme couldn't be loaded. Check your connection and try again.");
@@ -1647,5 +1690,7 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 }
 </script>
+<script data-goatcounter="https://jf-bsc-calendar.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

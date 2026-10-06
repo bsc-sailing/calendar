@@ -77,12 +77,48 @@ Refit each season rather than reusing an old model — a new year's printed date
 python3 generate-tide-reference.py --repo-root ../.. --months-ahead 24 --out ../../tides.json
 ```
 
-This runs weekly via `.github/workflows/update-tides.yml`, the same pattern as the club events workflow — pushes straight to `main` using the same `RELEASE_TOKEN` secret (see README.md, "Club Events," for why that's needed and considered safe), and only actually commits when the *data* changed, not just the file's own timestamp. `tides.json` exists as a standalone, general-purpose dataset — **the app doesn't read it yet**; wiring it in as a fallback (so any date the app shows, not just a season's own pre-filled rows, can offer a tide) is a deliberate next step, not done here.
+This runs weekly via `.github/workflows/update-tides.yml`, the same pattern as the club events workflow — pushes straight to `main` using the same `RELEASE_TOKEN` secret (see README.md, "Club Events," for why that's needed and considered safe), and only actually commits when the *data* changed, not just the file's own timestamp. Since v2.16.0 the app also reads `tides.json` for any day without a printed tide (see "Clock time fix" below).
 
 **Two genuine bugs were found and fixed while building the weekly refresh** — worth knowing about since the same mistakes are easy to make again if this is ever touched:
 
 1. `git diff --quiet` only detects changes to a file git already knows about — it silently reports "no change" for a file that doesn't exist in the repo yet. `tides.json`'s very first run would have been skipped. Fixed by checking `git status --porcelain` instead, which correctly sees a brand-new file too.
 2. Both `events.json` and `tides.json` carry their own `generated` timestamp, which changes every run regardless of whether the real content did — so a plain file diff always looks "changed," committing every single run for no reason. Fixed by comparing the JSON with that one field stripped out, in both workflows.
+
+## Clock time fix (v2.16.0)
+
+Programme times are UK clock time: GMT in winter, BST in summer. Until v2.16.0 the scripts fed those times into the model as if they were UTC, so every summer point sat an hour away from where the tide really was, with a one-hour step at each clock change. `tidefit.py` and `tide_predict.py` now convert to UTC before fitting and back to UK clock time after predicting.
+
+The effect on the same 113 printed points:
+
+| | Before | After |
+|---|---|---|
+| Accuracy check (in-sample, as printed by `generate-tide-reference.py`) | time RMS 50 min | time RMS 28 min |
+| Leave-one-out (each point predicted by a fit that never saw it) | time RMS 50 min, median 39 min | time RMS 29 min, median 23 min |
+| Height RMS (leave-one-out) | 0.20 m | 0.14 m |
+
+Winter dates moved the most, some by about an hour. The figures in the "Accuracy" section above were measured before this fix. `tide-model-2026.json` has been refitted with the fix.
+
+The app now reads `tides.json` for any day without a printed tide, so these improvements (and the official check below) reach every `≈` value in the app, not just the Tides & Weather screen. A printed `Programme` tide always wins.
+
+## Checking against published tide predictions
+
+`.github/workflows/check-official-tides.yml` runs daily. It reads the next 7 days of high waters from the club website's tide table (`next7tides.php`), records them in `tides-official.csv`, then refits `tides.json`. No key or setup is needed.
+
+**Why the club table.** It's National Oceanography Centre predictions for the BSC pontoon, the same source and reference point as the printed programme: on 9–11 Oct 2026, the three dates in both, it matched the programme to the minute and the centimetre. So the app never shows two different "official" tides for the same day, and no station offset is needed (the generator still measures one and found +0 min, +0.0 m with zero spread). The club site works on the club's behalf, so using it is fine; the app credits NOC wherever these figures appear.
+
+The page lists weekdays, not dates, with an AM and PM high water per row. The script maps rows to dates from today, checks every weekday lines up, and takes the high water nearest midday (the programme's convention). If the page ever changes shape, the run fails rather than recording something wrong.
+
+**What it gives you**
+
+- **Published times in the app for the coming week**, without the `≈`, with the NOC credit. Turn this off with `"show_in_app": false` in `official-tides.json`.
+- **An honest accuracy record.** The first time a date is fetched, the model's estimate for it is saved next to the published figure and never changed afterwards. `tides.json` reports the running result as `estimate_vs_official`. On the first four dates (6–12 Oct 2026) the refitted model was 18–44 minutes early (RMS 37 min), so the published week is a real improvement on the estimate.
+- **A model that keeps improving.** Each published point joins the training data, one more real high water per day across the whole year, including winter.
+
+Note that `tides-official.csv` is public, so over a year it accumulates a full year of daily pontoon high waters, more than the 7 days the club page shows non-members. If the club would rather keep that private, the workflow can store the history in a private repo in the org instead.
+
+**ADMIRALTY as a comparison (optional).** To see how ADMIRALTY's figures differ from the club table, sign up for the free **UK Tidal API – Discovery** at developer.admiralty.co.uk and add the key as a repo secret named `UKHO_API_KEY`. The next run lists the nearest stations; put one in `station_id`/`station_name` in `official-tides.json`. From then on each run fetches both, records ADMIRALTY's figures in their own columns, and adds a club-vs-ADMIRALTY table to the run summary. Only the club figures are shown or trained on.
+
+If the club page ever goes away, set `"source": "admiralty"` to switch over. The station offset step then lines ADMIRALTY's figures up with the programme automatically, once 3 dates overlap.
 
 ## Single-date lookups, for spot-checking
 

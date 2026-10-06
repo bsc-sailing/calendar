@@ -1,0 +1,69 @@
+# Turns an approved "Add an extra date" issue into a pull request that adds a
+# row to extras-YEAR.csv. Nothing reaches the app until a maintainer approves
+# and merges that PR. See README, "Extra dates".
+name: Extra date request
+
+on:
+  issues:
+    types: [opened, edited, labeled]
+
+permissions:
+  contents: write        # push the request's branch (never main)
+  pull-requests: write   # open the PR
+  issues: write          # comment back on the issue
+
+concurrency:
+  group: extra-date-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # Only extra-date requests, and only when the author is in the club org (or
+    # a collaborator), or a maintainer has added the "approved" label.
+    if: >-
+      startsWith(github.event.issue.title, '[Extra date]') &&
+      github.event.issue.state == 'open' &&
+      (contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association) ||
+       contains(github.event.issue.labels.*.name, 'approved'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # The issue text is untrusted input: it's read from the event file by the
+      # script, never pasted into a shell command here.
+      - name: Add the row
+        id: add
+        run: python3 scripts/add-extra-date.py --event "$GITHUB_EVENT_PATH" --repo-root .
+
+      - name: Explain what needs fixing
+        if: steps.add.outputs.ok != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: gh issue comment "$ISSUE" --body-file add-extra-date-message.md
+
+      - name: Open or update the pull request
+        if: steps.add.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          BRANCH="extra-date/issue-$ISSUE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add -- extras-*.csv
+          git commit -m "Add extra date from #$ISSUE"
+          git push --force origin "$BRANCH"
+          if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+            gh pr create --head "$BRANCH" --base main \
+              --title "Add extra date from #$ISSUE" \
+              --body-file add-extra-date-pr.md
+            gh issue comment "$ISSUE" --body "Thanks. A pull request has been opened for a maintainer to review, and this will appear in the app once it's merged. Editing this issue updates the request."
+          fi

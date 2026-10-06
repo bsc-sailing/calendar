@@ -80,6 +80,8 @@ This is built from `tides.json`, which is a separate, independent dataset from e
 
 Weather shows as a 3-hour strip centred on that day's high water (2 hours before, at, and 2 hours after) — the same style as a day's own details screen — for whichever of those hours fall within the forecast's ~16-day range. Further out, only the tide shows.
 
+Days in the app with no printed tide also take their `≈` tide from `tides.json`, so they improve whenever it's refitted. The coming week shows the club's published pontoon high waters (National Oceanography Centre, the same source as the printed programme) without the `≈`, refreshed daily. See `scripts/tide/TIDES.md`, "Checking against published tide predictions".
+
 **`tides.json` refreshes itself weekly**, via `.github/workflows/update-tides.yml` — see `scripts/tide/TIDES.md` for the model itself (method, accuracy, and how it's validated), and the notes below for the automation around it.
 
 - **Why a rolling 730-day file, not just each season's own blanks filled in:** it means a date has a sensible tide *before* that season's file even exists, and it means the fit keeps improving as more seasons of real data accumulate — `generate-tide-reference.py` pools every `programme-*.csv` it finds in the repo, not just the latest one.
@@ -101,6 +103,25 @@ Tap **Club Events** for Open Days, RYA courses, talks, socials and other club ev
 - **Run it early once:** after merging, trigger it by hand from the repo's **Actions** tab → **Update club events** → **Run workflow**, rather than waiting up to a day for the first scheduled run.
 - **What it does and doesn't touch:** only `events.json` — never the programme, courses, or app code. A feed that returns zero events (an outage, or the club changing its page) is treated as a failure, not "no events" — the existing file is left alone rather than overwritten, and the run logs a warning. Only upcoming events are shown in the app; past ones drop off the list on their own as the date passes. A run that finds no real change doesn't commit at all — the content comparison ignores the file's own `generated` timestamp, so a daily no-op run doesn't create daily noise in the repo's history.
 - **If it stops finding anything:** the club's feed URL or structure has probably changed. Check `https://blackwatersailingclub.org.uk/events/RSS` still returns XML in that shape, and adjust `scripts/update-events.py` if not.
+
+## Extra dates
+
+Races, socials or training added after the printed programme go in **`extras-YEAR.csv`** (for example `extras-2026.csv`), not in the programme file. The app merges it into that year's season and marks each one **Extra**, with "Added after the printed programme" in the day's details. Keeping them separate means re-exporting the printed programme never wipes them. Tides for these dates come from `tides.json` automatically.
+
+Same columns as the programme, plus a `Request` column (the issue it came from). An informal race is one row with no fleet: `Event` = `Informal race`, `Race / series` = its name, `Detail` = where and who, for example "On the river – All classes welcome. Not part of any series."
+
+**Requesting one.** Anyone with a GitHub account can open an issue with the **Add an extra date** form (**Issues → New issue**). Nothing reaches the app without a maintainer's approval:
+
+1. When the person asking is a member of the bsc-sailing org, a workflow checks the form straight away. Otherwise it waits until a maintainer adds the `approved` label (only people with triage or write access can label). Requests from strangers therefore cost nothing but a glance.
+2. If a field doesn't make sense (a date in the past, a start time that isn't `HH:MM`), it comments on the issue saying what to fix. Editing the issue re-checks it.
+3. Otherwise it opens a pull request adding the row to `extras-YEAR.csv`. The PR is opened by `github-actions[bot]`, so either code owner can approve it, including whoever asked.
+4. Merging the PR publishes it and closes the issue.
+
+Every field is treated as untrusted text: checked against what it should look like, stripped of control characters, length-limited, read from the event file rather than pasted into a shell command, and shown in the app as plain text only.
+
+**One-off setup:** create an `approved` label (**Issues → Labels → New label**); turn on **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests** (it may also need allowing at org level, under the org's own Settings → Actions); and make sure `.github/CODEOWNERS` lists both maintainers, each with write access.
+
+You can still edit `extras-YEAR.csv` directly on GitHub (pencil icon) for a quick fix. Check it afterwards with `?check`, which also reports how many extra rows were loaded.
 
 ## Adding a new season (2027 and beyond)
 
@@ -143,7 +164,29 @@ Weekly sessions (Mirror sailing and Beach Club) are named in `CONFIG.weekly` nea
 
 The version number is at the bottom of the app. Tap **Support info** there for the app version, the seasons loaded (with the date each data file was last updated), whether the offline copy is active, which saved copy is in use, and when Club Events and the tide reference were each last updated — a quick way to spot either of their scheduled jobs having quietly stopped, without needing to check GitHub. That is usually enough to work out whether someone is seeing an old version. Add `?check` to the address for a data check. `CHANGELOG.md` lists what changed in each version.
 
-To release a new version: change `CONFIG.version` and `CONFIG.released` in `index.html`, change `VERSION` in `sw.js` to match, and add a line to `CHANGELOG.md`.
+### Releasing a new version
+
+A release is a zip called `bsc-sailing-app.zip` containing the changed files at their repo paths, plus a `release-manifest.json`:
+
+```json
+{ "version": "2.16.2", "base_version": "2.15.3",
+  "base_files":  { "index.html": "<git blob hash it was built from>", "new-file.csv": null },
+  "known_files": { "index.html": ["<an earlier release's hash>"] } }
+```
+
+`version` must match `CONFIG.version` in `index.html`, `VERSION` in `sw.js`, and the newest heading in `CHANGELOG.md` (bump all three, and `CONFIG.released`). `base_files` records each file as it was when the release was built (`git hash-object <file>`), or `null` for a new file; `known_files` lists other copies that are safe to replace, such as an earlier release's.
+
+To apply one, download it and run `./scripts/sync-release.sh` from the repo root. It:
+
+1. finds the newest `bsc-sailing-app*.zip` in `~/Downloads` (or takes a path);
+2. checks the version numbers inside agree, and refuses a zip older than the repo unless you insist;
+3. switches to the zip's copy of `sync-release.sh` first, if it has a newer one;
+4. fast-forwards if GitHub is ahead (the scheduled data jobs push there daily);
+5. warns before overwriting any file changed on GitHub since the release was built (data files the scheduled jobs own are exempt), asking even with `-y`;
+6. tags a backup, copies the files in, commits, pushes, tags the version, and waits for the live site to show it;
+7. moves the zip to `~/Downloads/bsc-sailing-app-applied/`, so the next download keeps the plain name.
+
+Add `-y` to skip the routine questions.
 
 ## Files
 
@@ -151,6 +194,7 @@ To release a new version: change `CONFIG.version` and `CONFIG.released` in `inde
 | --- | --- |
 | `index.html` | The app. Settings, including the forecast location, are in `CONFIG` at the top of the script. |
 | `programme-2026.csv`, `programme-2027.csv`, ... | One programme file per season. |
+| `extras-2026.csv`, `extras-2027.csv`, ... | Dates added after the printed programme. See **Extra dates**. |
 | `programme-template.csv` | Column headings and sample rows for a new season. It is not loaded by the app. |
 | `manifest.webmanifest` | Name, colours and icons, so phones can install it. |
 | `sw.js` | Lets it open offline. It always tries the internet first, so updates appear straight away. |
@@ -163,10 +207,11 @@ To release a new version: change `CONFIG.version` and `CONFIG.released` in `inde
 | `tides.json` | The rolling 24-month tide reference, generated by `.github/workflows/update-tides.yml`. Don't hand-edit it either, for the same reason. |
 | `.github/workflows/update-events.yml`, `scripts/update-events.py` | The scheduled job that keeps `events.json` current. |
 | `.github/workflows/update-tides.yml`, `scripts/tide/generate-tide-reference.py` | The scheduled job that keeps `tides.json` current. |
+| `.github/ISSUE_TEMPLATE/extra-date.yml`, `.github/workflows/extra-date.yml`, `scripts/add-extra-date.py` | The **Add an extra date** form, and the workflow that turns an approved request into a pull request. |
+| `.github/workflows/check-official-tides.yml`, `scripts/tide/fetch-official-tides.py`, `scripts/tide/official-tides.json` | The daily check against the club's published tide table (and optionally ADMIRALTY), and its settings. |
+| `tides-official.csv` | Published high waters collected by that check, with what we'd estimated for each date beforehand. Generated: don't hand-edit. |
 | `scripts/tide/tidefit.py`, `tide_predict.py`, `TIDES.md`, `tide-model-2026.json` | The tide model itself — fitting it, predicting from it, and documenting it. See `scripts/tide/TIDES.md`. |
 | `.github/CODEOWNERS` | Who has to approve a pull request — see **Contributing** above. |
-| `scripts/sync-release.sh` | Applies a downloaded release zip to this repo: backs up the current version as a tag, copies the files in, commits, pushes, tags, and confirms the live site picked it up. Run it from the repo root as `./scripts/sync-release.sh`. |
+| `scripts/sync-release.sh` | Applies a downloaded release zip to this repo: backs up the current version as a tag, copies the files in, commits, pushes, tags, and confirms the live site picked it up. Run it from the repo root as `./scripts/sync-release.sh`. See **Releasing a new version**. |
 
 Weather data is from [Open-Meteo.com](https://open-meteo.com/).
-
-Page views are counted with [GoatCounter](https://www.goatcounter.com/) (site `jf-bsc-calendar`), which uses no cookies and collects no personal data. The tag is the last thing in `<head>` in `index.html`; delete that one `<script>` line to turn it off.

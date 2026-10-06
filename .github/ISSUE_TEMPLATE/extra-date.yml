@@ -1,0 +1,66 @@
+name: Add an extra date
+description: A race, event or session that isn't in the printed programme. Once approved, it's added to the calendar automatically.
+title: "[Extra date] "
+labels: ["extra-date"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for dates added after the printed programme: informal races, socials, extra training.
+        A club maintainer checks every request before it appears in the app. Tides are filled in automatically.
+  - type: input
+    id: date
+    attributes:
+      label: Date
+      description: As YYYY-MM-DD, for example 2026-10-16
+      placeholder: "2026-10-16"
+    validations:
+      required: true
+  - type: input
+    id: name
+    attributes:
+      label: Name
+      description: What it's called, as it should appear in the app
+      placeholder: "Blindfold Racing"
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Type
+      options:
+        - Informal race (not part of any series)
+        - Social or other event
+        - Training
+    validations:
+      required: true
+  - type: input
+    id: start
+    attributes:
+      label: Start time
+      description: 24-hour HH:MM, or TBC
+      placeholder: "10:00"
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options:
+        - On the lake
+        - On the river
+        - Ashore
+    validations:
+      required: true
+  - type: input
+    id: who
+    attributes:
+      label: Who can take part
+      value: "All classes welcome"
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else (optional)
+      description: Shown in the day's details. Keep it short.

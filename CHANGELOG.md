@@ -2,9 +2,19 @@
 
 Version numbers are in `CONFIG.version` in `index.html` and `VERSION` in `sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**.
 
-## 2.15.4 – 2 Oct 2026
-- Added GoatCounter page-view counting (site `jf-bsc-calendar`), to see how much the app is used. GoatCounter uses no cookies and collects no personal data. Blocked by most ad blockers, so counts are a lower bound.
-- The service worker now leaves GoatCounter requests alone, so page counts are never cached or replayed from the offline copy.
+## 2.16.2 – 6 Oct 2026
+- `sync-release.sh` does the whole release from a downloaded `bsc-sailing-app.zip`: fast-forwards if GitHub is ahead, reads the version from the zip's `release-manifest.json` and checks `index.html`, `sw.js` and `CHANGELOG.md` all agree, refuses an older zip unless you insist, warns before overwriting anything changed on GitHub since the release was built, updates itself if the zip has a newer copy, and moves the applied zip to `~/Downloads/bsc-sailing-app-applied/`.
+
+## 2.16.1 – 6 Oct 2026
+- The daily tide check now reads the club website's 7-day pontoon table (National Oceanography Centre, the same source as the printed programme) instead of needing an ADMIRALTY key. The coming week shows those times without the `≈`, credited to NOC. ADMIRALTY is now an optional comparison.
+
+## 2.16.0 – 6 Oct 2026
+- Extra dates: `extras-YEAR.csv` for races and events added after the printed programme, shown with an **Extra** badge. Three added: Blindfold Racing (16 Oct), Postcard Race (23 Oct), Christmas Challenge (22 Dec).
+- **Add an extra date** issue form, with a workflow that turns approved requests into a pull request.
+- Tide model fixed to treat programme times as UK clock time (GMT/BST) rather than UTC, cutting the typical timing error from about 50 to about 28 minutes.
+- Days without a printed tide now use `tides.json`, so their estimates improve whenever it's refitted.
+- Daily check against official ADMIRALTY tide predictions (needs a free API key; see `scripts/tide/TIDES.md`), which records estimate accuracy and feeds official points into the model.
+- GoatCounter visit counting.
 
 ## 2.15.3 – 1 Oct 2026
 - Reordered the nav buttons: Race Courses, Race Marks Map, Tides & Weather, Club Events — groups the three sailing-data screens together, with Club Events on its own at the end.

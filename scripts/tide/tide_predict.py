@@ -23,6 +23,9 @@ import csv
 import json
 import numpy as np
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
+
+LOCAL_TZ = ZoneInfo("Europe/London")   # dates and times in and out are UK clock time
 
 
 def load_model(path):
@@ -42,7 +45,7 @@ def height_at(model, t_hours):
 
 
 def predict_day(model, date_str, near="12:00", step_minutes=1):
-    day0 = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    day0 = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=LOCAL_TZ).astimezone(timezone.utc)
     t0 = (day0 - model["epoch_dt"]).total_seconds() / 3600.0
     n = int(24 * 60 / step_minutes) + 1
     t = t0 + np.arange(n) * (step_minutes / 60.0)
@@ -52,10 +55,10 @@ def predict_day(model, date_str, near="12:00", step_minutes=1):
     peak_idx = np.where(is_peak)[0]
     if len(peak_idx) == 0:
         return None
-    near_dt = datetime.strptime(date_str + " " + near, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+    near_dt = datetime.strptime(date_str + " " + near, "%Y-%m-%d %H:%M").replace(tzinfo=LOCAL_TZ).astimezone(timezone.utc)
     near_t = (near_dt - model["epoch_dt"]).total_seconds() / 3600.0
     best = peak_idx[np.argmin(np.abs(t[peak_idx] - near_t))]
-    peak_time = model["epoch_dt"] + timedelta(hours=float(t[best]))
+    peak_time = (model["epoch_dt"] + timedelta(hours=float(t[best]))).astimezone(LOCAL_TZ)
     return peak_time.strftime("%H:%M"), round(float(h[best]), 1)
 
 

@@ -1,0 +1,73 @@
+# Daily: read the next 7 days of published high waters (the club's pontoon
+# table; optionally ADMIRALTY too, for comparison), record how they compare
+# with our estimates, and refit tides.json with them.
+# See scripts/tide/TIDES.md, "Checking against published tide predictions".
+name: Check published tides
+
+on:
+  schedule:
+    - cron: "20 4 * * *"     # 04:20 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: read            # pushes use RELEASE_TOKEN, same as the other data jobs
+
+concurrency:
+  group: tides-json         # never two jobs writing tides.json at once
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.RELEASE_TOKEN }}
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install numpy
+
+      - name: Fetch published high waters
+        working-directory: scripts/tide
+        env:
+          UKHO_API_KEY: ${{ secrets.UKHO_API_KEY }}
+        run: python3 fetch-official-tides.py --repo-root ../..
+
+      - name: Refit the tide reference
+        if: hashFiles('tides-official.csv') != ''
+        working-directory: scripts/tide
+        run: |
+          python3 generate-tide-reference.py --repo-root ../.. --months-ahead 24 --out ../../tides.json | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit if anything really changed
+        run: |
+          changed=false
+          if [ -n "$(git status --porcelain tides-official.csv)" ]; then changed=true; fi
+          # tides.json's own "generated" timestamp changes every run; ignore it
+          if [ -f tides.json ] && ! python3 - <<'PY'
+          import json, subprocess, sys
+          try:
+              old = json.loads(subprocess.run(["git", "show", "HEAD:tides.json"], capture_output=True, text=True, check=True).stdout)
+          except Exception:
+              sys.exit(1)
+          new = json.load(open("tides.json"))
+          for d in (old, new):
+              d.pop("generated", None)
+          sys.exit(0 if old == new else 1)
+          PY
+          then changed=true; fi
+          if [ "$changed" = false ]; then
+            git checkout -- tides.json 2>/dev/null || true
+            echo "No real change."; exit 0
+          fi
+          git config user.name "jfairhead"
+          git config user.email "jfairhead@users.noreply.github.com"
+          git add tides.json
+          if [ -f tides-official.csv ]; then git add tides-official.csv; fi
+          git commit -m "Tide check $(date -u +%Y-%m-%d)"
+          git pull --rebase origin main
+          git push origin HEAD:main

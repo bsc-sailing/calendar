@@ -1,0 +1,10 @@
+{
+  "_about": "Settings for the daily tide check (fetch-official-tides.py). See TIDES.md, 'Checking against published tide predictions'.",
+  "source": "club",
+  "club_url": "https://blackwatersailingclub.co.uk/site_code/next7tides.php",
+  "attribution": "Tide from the club's tide table for the BSC pontoon. © National Oceanography Centre.",
+  "station_id": "",
+  "station_name": "",
+  "show_in_app": true,
+  "min_overlap_days": 3
+}
