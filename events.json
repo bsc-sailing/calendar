@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-01T13:28:56Z",
+  "generated": "2026-10-07T13:34:32Z",
   "source": "https://blackwatersailingclub.org.uk/events",
   "events": [
     {
@@ -19,6 +19,14 @@
       "link": "https://blackwatersailingclub.org.uk/event-6488906"
     },
     {
+      "title": "Tuesday Evening Talk",
+      "date": "2026-11-10",
+      "time": "18:30",
+      "hasTime": true,
+      "excerpt": "Sailing Single-handed to Greenland, via the Orkneys, Faroes & Iceland by Alan Wilson Sailing single-handed from Tollesbury to Greenland (and back!) last year in a 10m Nauticat, taking 5 months and with some interesting…",
+      "link": "https://blackwatersailingclub.org.uk/event-6560143"
+    },
+    {
       "title": "EAMA (East Anglian Maritime Awards) Prize Giving",
       "date": "2026-11-11",
       "time": "18:30",
@@ -33,6 +41,30 @@
       "hasTime": true,
       "excerpt": "2026 Cadet Laying Up Supper and Disco Saturday 14th November 2026@ 18:00 Bar opens 6pm, Food from 7pm, Disco from 8:00pm to 9:00pm (primary school age), 9:00pm to 10pm (secondary school age) Come and celebrate the end…",
       "link": "https://blackwatersailingclub.org.uk/event-6837737"
+    },
+    {
+      "title": "Lake exclusive use by Chelmsford Radio YC",
+      "date": "2026-11-22",
+      "time": "09:00",
+      "hasTime": true,
+      "excerpt": "The lake is being used by the Chelmsford Radio Yacht Club on Sunday 22nd November for an Eastern District event. This is exclusive use, so the lake will not be available to members.",
+      "link": "https://blackwatersailingclub.org.uk/event-6868841"
+    },
+    {
+      "title": "Tuesday Evening Talk",
+      "date": "2026-12-15",
+      "time": "18:30",
+      "hasTime": true,
+      "excerpt": "Tuesday Evening talk for December. Mayland's History by Ed skinner The Osea room bar opens at 18:30 and the talk starts in the main upper deck club room room at 19:30 No need to book, just turn up. Non members from…",
+      "link": "https://blackwatersailingclub.org.uk/event-6856257"
+    },
+    {
+      "title": "Tuesday Evening Talk",
+      "date": "2027-01-12",
+      "time": "18:30",
+      "hasTime": true,
+      "excerpt": "Tuesday Evening talk for January. An evening of Cruiser memories - members will be giving insights into their cruising adventures of 2026. The calendar of events for 2027 will also be discussed. The Osea room bar opens…",
+      "link": "https://blackwatersailingclub.org.uk/event-6868857"
     },
     {
       "title": "MLSC Charity Row Race for RNLI",
@@ -51,28 +83,20 @@
       "link": "https://blackwatersailingclub.org.uk/event-6849959"
     },
     {
+      "title": "Tuesday Evening Talk",
+      "date": "2027-02-09",
+      "time": "18:30",
+      "hasTime": true,
+      "excerpt": "Tuesday Evening talk for February. Virtual Cruise up the Blackwater from sea to Beeleigh Falls by John Rogers The Osea room bar opens at 18:30 and the talk starts in the main upper deck club room room at 19:30 No need…",
+      "link": "https://blackwatersailingclub.org.uk/event-6868866"
+    },
+    {
       "title": "Heybridge Basin Gig Race",
       "date": "2027-02-21",
       "time": "00:00",
       "hasTime": false,
       "excerpt": "The clubhouse is booked to host the Heybridge Gig Race event",
       "link": "https://blackwatersailingclub.org.uk/event-6849969"
-    },
-    {
-      "title": "BJRC Dinner",
-      "date": "2027-02-27",
-      "time": "19:00",
-      "hasTime": true,
-      "excerpt": "BJRC Annual Trophy Dinner BJRC members and guests only For info email bjrcnews2025@gmail.com",
-      "link": "https://blackwatersailingclub.org.uk/event-6849965"
-    },
-    {
-      "title": "Maldon Joint River Safety Meeting",
-      "date": "2027-03-02",
-      "time": "19:30",
-      "hasTime": true,
-      "excerpt": "MALDON ANNUAL JOINT USERS AND RIVER SAFETY MEETING TUESDAY, 2 MARCH 2026 – 7.30PM Maldon Harbour Improvement Commisioners (MHIC) host this event. Everyone interested in safety matters relating to the River Blackwater is…",
-      "link": "https://blackwatersailingclub.org.uk/event-6804843"
     }
   ]
 }
