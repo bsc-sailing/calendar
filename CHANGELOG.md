@@ -2,7 +2,10 @@
 
 Version numbers are in `CONFIG.version` in `app/index.html` and `VERSION` in `app/sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**. Changes merged before the next version number is chosen are listed under **Unreleased**.
 
-## Unreleased
+## 2.17.0 – 8 Oct 2026
+- **Preview a programme file:** open the app with `?preview` and choose a programme CSV from your own device. The app shows it as that season, with the data check (now with line numbers for each problem). Nothing is uploaded.
+- **Race card** (`racecard.html`): any published season, or a file from your device, laid out like the printed race card for printing on A4 landscape or saving as a PDF.
+- **Format guide** (`guide.html`): how to prepare a season's programme, for people without a GitHub account, with an Excel template (drop-down lists, text-formatted times) and links to the preview and race card.
 - The site is built and published by a GitHub Actions workflow (`deploy.yml`) on every push to `main`, after checking the season data. Pull requests get the same check without publishing. New versions are tagged automatically.
 - Repo split into folders: `app/` (the app), `app/assets/` (images), `data/` (everything the app reads), `templates/`, `docs/`. The live site's addresses are unchanged.
 - `sync-release.sh` applies a release zip as a pull request (`release/vX.Y.Z`), opens it with the GitHub CLI if available, and offers to merge it. Backup tags are replaced by reverting the PR.

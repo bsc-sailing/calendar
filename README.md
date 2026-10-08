@@ -75,7 +75,14 @@ Races, socials or training added after the printed programme are shown with an *
 
 ## Keeping the data up to date
 
-The season programme, extra dates, course cards and chart are all files in the `data/` folder. [docs/updating-data.md](docs/updating-data.md) covers adding a new season, fixing a date, adding an extra date and replacing the course cards or chart, step by step, including how to do it from a web browser without installing anything. The column-by-column format is in [docs/data-format.md](docs/data-format.md).
+The season programme, extra dates and course cards are files in the `data/` folder (the chart is in `app/assets/`). [docs/updating-data.md](docs/updating-data.md) covers adding a new season, fixing a date, adding an extra date and replacing the course cards or chart, step by step, from a web browser without installing anything.
+
+For whoever prepares the programme, with or without a GitHub account, the **[format guide](https://bsc-sailing.github.io/calendar/guide.html)** on the live site has everything in one place:
+
+- the column-by-column format, with a worked example comparing a race-card day with the app's rows (the same text as [docs/data-format.md](docs/data-format.md));
+- an **Excel template** with the headings, formats and drop-down lists set up (`templates/programme-template.xlsx`, regenerated with `scripts/make-template-xlsx.py`);
+- **[Preview a file](https://bsc-sailing.github.io/calendar/?preview):** open a programme CSV from your own device in the app, with a data check that gives line numbers. Nothing is uploaded;
+- **[Race card](https://bsc-sailing.github.io/calendar/racecard.html):** any published season, or a file from your device, laid out like the printed race card, for printing or saving as a PDF.
 
 Every change is checked automatically before it goes live, and goes through a pull request so there's a record of what changed and why.
 
@@ -85,15 +92,15 @@ Every change is checked automatically before it goes live, and goes through a pu
 
 | Folder | What's in it |
 | --- | --- |
-| `app/` | The app itself: `index.html` (settings in `CONFIG` at the top of the script), `sw.js` (the offline copy) and `manifest.webmanifest` (name, colours and icons for saving it as an app). |
+| `app/` | The app itself: `index.html` (settings in `CONFIG` at the top of the script), `sw.js` (the offline copy) and `manifest.webmanifest` (name, colours and icons for saving it as an app). Also `guide.html` (the format guide) and `racecard.html` (the printable race card). |
 | `app/assets/` | Images: the app icons, the club logo and the race marks chart. |
 | `data/` | Everything the app reads: `programme-YEAR.csv`, `extras-YEAR.csv`, `courses-2026.csv`, and the generated `events.json`, `tides.json` and `tides-official.csv` (don't hand-edit those three; the scheduled jobs rewrite them). |
-| `templates/` | `programme-template.csv`: column headings and sample rows for a new season. Published, but not loaded by the app. |
-| `docs/` | How-to guides: updating the data, the data format, releasing, and the automation. |
+| `templates/` | `programme-template.csv` and `programme-template.xlsx`: column headings and sample rows for a new season. Published for download, but not loaded by the app. |
+| `docs/` | How-to guides: updating the data, the data format, releasing, and the automation. Published too, so `guide.html` can show `data-format.md`. |
 | `scripts/` | The site build and data check, the release script, the events and extra-date scripts, and the tide model (`scripts/tide/`). |
 | `.github/` | Workflows, the extra-date issue form, and `CODEOWNERS`. |
 
-The live site doesn't have these folders: `scripts/build-site.py` publishes every file from `app/`, `app/assets/`, `data/` and `templates/` side by side, at the same addresses as before the repo was split up (`…/calendar/programme-2026.csv` and so on). So moving files between those folders never breaks bookmarks, saved apps or the offline copy. Two files with the same name in different folders stop the build.
+The live site doesn't have these folders: `scripts/build-site.py` publishes every file from `app/`, `app/assets/`, `data/`, `templates/` and `docs/` side by side, at the same addresses as before the repo was split up (`…/calendar/programme-2026.csv` and so on). So moving files between those folders never breaks bookmarks, saved apps or the offline copy. Two files with the same name in different folders stop the build.
 
 ### How changes reach the live site
 

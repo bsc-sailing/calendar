@@ -54,6 +54,6 @@ Step 3 is what lets a maintainer merge their own PRs without waiting for anyone:
 
 ## Publishing settings
 
-The site is published by `.github/workflows/deploy.yml`, which needs **Settings → Pages → Build and deployment → Source: GitHub Actions**. `scripts/build-site.py` assembles it from `app/`, `app/assets/`, `data/` and `templates/`, publishing every file side by side at the same addresses as before the repo was split into folders; see the README's "Repo layout".
+The site is published by `.github/workflows/deploy.yml`, which needs **Settings → Pages → Build and deployment → Source: GitHub Actions**. `scripts/build-site.py` assembles it from `app/`, `app/assets/`, `data/`, `templates/` and `docs/`, publishing every file side by side at the same addresses as before the repo was split into folders; see the README's "Repo layout".
 
 To check a build locally: `python3 scripts/check-data.py && python3 scripts/build-site.py`, then `cd _site && python3 -m http.server` and open `http://localhost:8000/`.

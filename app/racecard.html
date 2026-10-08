@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Race Card Preview</title>
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>
+:root {
+  --bg: #E9EFF2; --surface: #FFFFFF; --ink: #0E2231; --muted: #4D6577; --line: #9FB3BF; --line-soft: #D5E0E6;
+  --water: #1B6486; --head: #0E2231; --head-ink: #FFFFFF; --month: #DCE8EE; --gold-soft: #F8E6B8; --gold: #8A5A00;
+  --bad: #BF3A1E;
+  --body: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.4; font-variant-numeric: tabular-nums; }
+.bar { position: sticky; top: 0; z-index: 2; background: var(--head); color: var(--head-ink); padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+.bar h1 { font-size: 1.05rem; margin: 0 8px 0 0; font-weight: 700; }
+.bar label { display: inline-flex; align-items: center; gap: 6px; font-size: 0.92rem; }
+.bar select, .bar button, .bar .file { font: inherit; font-size: 0.92rem; border-radius: 8px; border: 1px solid #ffffff55; background: #ffffff14; color: inherit; padding: 6px 10px; cursor: pointer; }
+.bar select option { color: #0E2231; }
+.bar button.primary { background: #FFFFFF; color: var(--head); border-color: #FFFFFF; font-weight: 700; }
+.bar a { color: #CFE6F2; font-size: 0.92rem; }
+.bar .spacer { flex: 1; }
+.file input { display: none; }
+.note { max-width: 1100px; margin: 14px auto 0; padding: 0 16px; color: var(--muted); font-size: 0.92rem; }
+.note.bad { color: var(--bad); font-weight: 700; }
+.sheet { background: var(--surface); max-width: 1100px; margin: 14px auto 40px; padding: 18px 18px 22px; box-shadow: 0 1px 4px #0E223122; }
+.title { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+.title h2 { margin: 0; font-size: 1.35rem; letter-spacing: 0.02em; text-transform: uppercase; }
+.title .src { color: var(--muted); font-size: 0.8rem; text-align: right; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 0.78rem; }
+th, td { border: 1px solid var(--line); padding: 2px 4px; vertical-align: top; overflow-wrap: anywhere; }
+thead th { background: var(--head); color: var(--head-ink); font-weight: 700; text-align: left; vertical-align: bottom; }
+thead tr.order th { background: #1B3A50; font-weight: 600; text-align: center; }
+thead tr.order th.lead { text-align: left; }
+td.num, th.num { text-align: center; white-space: nowrap; }
+td.day { white-space: nowrap; }
+tr.month td { background: var(--month); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.8rem; padding: 3px 6px; }
+tr.gp td { background: var(--gold-soft); }
+tr.nr td.start { font-weight: 700; }
+.gp-tag { display: inline-block; margin-left: 4px; padding: 0 3px; border-radius: 3px; background: var(--gold); color: #fff; font-size: 0.68rem; font-weight: 700; vertical-align: 1px; }
+.est { color: var(--muted); }
+td.all { text-align: center; font-weight: 600; }
+.foot { margin-top: 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px 22px; font-size: 0.8rem; }
+.foot h3 { margin: 0 0 2px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.foot p { margin: 0; }
+.empty { padding: 40px 10px; text-align: center; color: var(--muted); }
+col.c-day { width: 9%; } col.c-hw { width: 5.4%; } col.c-ht { width: 4.8%; } col.c-st { width: 5.2%; }
+col.c-ev { width: 16%; }
+@page { size: A4 landscape; margin: 8mm; }
+@media print {
+  body { background: #fff; font-size: 12px; }
+  .bar, .note { display: none !important; }
+  .sheet { box-shadow: none; margin: 0; padding: 0; max-width: none; }
+  table { font-size: 7.4pt; }
+  th, td { padding: 1px 3px; }
+  tr { break-inside: avoid; }
+  thead { display: table-header-group; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1>Race card preview</h1>
+  <label>Season <select id="season"><option value="">Loading…</option></select></label>
+  <label class="file" title="Open a programme CSV from this computer. Nothing is uploaded.">Open a file… <input type="file" id="file" accept=".csv,text/csv"></label>
+  <label id="extrasWrap"><input type="checkbox" id="extras"> Include extra dates</label>
+  <span class="spacer"></span>
+  <a href="./">Back to the app</a>
+  <a href="guide.html">Format guide</a>
+  <button type="button" class="primary" id="print">Print / Save as PDF</button>
+</div>
+<p class="note" id="note">A printable race card built from the programme data, laid out like the printed one. Choose a season, or open a programme file from your computer to check a draft before it's published: nothing is uploaded. Print in landscape; "Save as PDF" in the print dialog makes a PDF.</p>
+<div class="sheet" id="sheet"><p class="empty">Loading…</p></div>
+
+<script>
+const PATTERN = "programme-{year}.csv", EXTRAS = "extras-{year}.csv";
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const WD = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const ORD = ["1st","2nd","3rd","4th","5th","6th","7th","8th","9th"];
+const $ = id => document.getElementById(id);
+function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; }
+
+function parseCSV(text) {
+  text = text.replace(/^\uFEFF/, "");
+  const rows = []; let row = [], f = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ",") { row.push(f); f = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(f); f = ""; if (row.some(x => x !== "")) rows.push(row); row = []; }
+    else f += c;
+  }
+  if (f !== "" || row.length) { row.push(f); if (row.some(x => x !== "")) rows.push(row); }
+  if (!rows.length) return [];
+  const head = rows.shift().map(h => h.trim());
+  return rows.map(r => Object.fromEntries(head.map((h, i) => [h, (r[i] || "").trim()])));
+}
+
+const isTime = s => /^\d\d:\d\d$/.test(s || "");
+const uniq = a => [...new Set(a.filter(Boolean))];
+
+/* One table row per date; one column per start order, plus one for everything without a fleet. */
+function build(records) {
+  const good = records.filter(r => /^\d{4}-\d\d-\d\d$/.test(r["Date"] || ""));
+  const skipped = records.length - good.length;
+  const fleetOrder = {}, colFleets = {};
+  good.forEach(r => { const o = Number(r["Race start order"]); if (r["Fleet"] && o >= 1 && o <= 9 && !fleetOrder[r["Fleet"]]) fleetOrder[r["Fleet"]] = o; });
+  Object.entries(fleetOrder).forEach(([f, o]) => (colFleets[o] = colFleets[o] || []).push(f));
+  const ncols = Math.max(6, ...Object.keys(colFleets).map(Number));
+  const byDate = new Map();
+  good.forEach(r => { if (!byDate.has(r["Date"])) byDate.set(r["Date"], []); byDate.get(r["Date"]).push(r); });
+  const days = [...byDate.keys()].sort().map(iso => {
+    const rows = byDate.get(iso);
+    const racing = rows.filter(r => r["Fleet"] && isTime(r["Start time"]));
+    const starts = (racing.length ? racing : rows).map(r => r["Start time"]).filter(isTime);
+    const start = starts.sort((a, b) => starts.filter(x => x === b).length - starts.filter(x => x === a).length)[0] || "";
+    const nr = !racing.length && rows.some(r => /^no racing$/i.test(r["Event"]));
+    const tideRow = rows.find(r => r["High water"]) || rows[0];
+    const cols = Array.from({ length: ncols }, () => []), other = [];
+    rows.forEach(r => {
+      const nos = r["Race no(s)"], series = r["Race / series"], ev = r["Event"], tr = r["Training"];
+      if (r["Fleet"]) {
+        const o = fleetOrder[r["Fleet"]];
+        const txt = series ? series + (nos ? " " + nos : "") : ev ? ev + (nos ? " " + nos : "") : tr || "";
+        if (o) cols[o - 1].push(txt); else other.push((r["Fleet"] + ": " + txt).trim());
+      } else if (!/^no racing$/i.test(ev)) {
+        let txt = series || ev || tr || "";
+        if (series && ev && /^(BJRC|Open meeting|Cadet racing)$/i.test(ev) === false && !series.includes(ev)) txt = ev + ": " + series;
+        if (tr && (series || ev)) txt += " / " + tr;
+        const st = r["Start time"];
+        if (isTime(st) && st !== start) txt += " (" + st + ")";
+        other.push(txt);
+      }
+    });
+    return {
+      iso, d: new Date(iso + "T12:00:00"), start: nr ? "NR" : start, nr,
+      hw: tideRow["High water"] || "", ht: tideRow["Tide height (m)"] || "", est: /^estimated$/i.test(tideRow["Tide source"] || ""),
+      gp: rows.some(r => /^true$/i.test(r["GP weekend"])), cols: cols.map(c => uniq(c).join(" / ")), other: uniq(other).join(" / ")
+    };
+  });
+  return { days, ncols, colFleets, skipped };
+}
+
+function render(records, label, year) {
+  const { days, ncols, colFleets, skipped } = build(records);
+  const sheet = $("sheet"); sheet.textContent = "";
+  if (!days.length) { sheet.appendChild(el("p", "empty", "No rows with a Date in YYYY-MM-DD format, so there's nothing to show. Check the file's headings match the format guide.")); return; }
+  const yr = year || days[0].iso.slice(0, 4);
+  const t = el("div", "title");
+  t.appendChild(el("h2", "", "BSC Sailing Programme " + yr));
+  const now = new Date();
+  t.appendChild(el("div", "src", "Preview from " + label + " · " + now.getDate() + " " + MONTHS[now.getMonth()].slice(0, 3) + " " + now.getFullYear()));
+  sheet.appendChild(t);
+
+  const table = el("table");
+  const cg = el("colgroup");
+  ["c-day", "c-hw", "c-ht", "c-st"].forEach(c => cg.appendChild(Object.assign(el("col", c))));
+  for (let i = 0; i < ncols; i++) cg.appendChild(el("col"));
+  cg.appendChild(el("col", "c-ev"));
+  table.appendChild(cg);
+  const thead = el("thead");
+  const r1 = el("tr", "order"); const lead = el("th", "lead", "Order of race starts"); lead.colSpan = 4; r1.appendChild(lead);
+  for (let i = 0; i < ncols; i++) r1.appendChild(el("th", "", ORD[i]));
+  r1.appendChild(el("th", "", ""));
+  const r2 = el("tr");
+  ["Date", "HW", "Ht (m)", "Start"].forEach((h, i) => r2.appendChild(el("th", i ? "num" : "", h)));
+  for (let i = 0; i < ncols; i++) r2.appendChild(el("th", "", (colFleets[i + 1] || []).join(", ")));
+  r2.appendChild(el("th", "", "BJRC & cruiser races, training, events"));
+  thead.append(r1, r2); table.appendChild(thead);
+
+  const tb = el("tbody"); let month = -1;
+  days.forEach(day => {
+    if (day.d.getMonth() !== month) {
+      month = day.d.getMonth();
+      const mr = el("tr", "month"); const mc = el("td", "", MONTHS[month] + (day.iso.slice(0, 4) !== yr ? " " + day.iso.slice(0, 4) : "")); mc.colSpan = ncols + 5; mr.appendChild(mc); tb.appendChild(mr);
+    }
+    const tr = el("tr", (day.gp ? "gp " : "") + (day.nr ? "nr" : ""));
+    const dc = el("td", "day", WD[day.d.getDay()] + " " + day.d.getDate());
+    if (day.gp) dc.appendChild(el("span", "gp-tag", "GP"));
+    tr.appendChild(dc);
+    tr.appendChild(el("td", "num" + (day.est ? " est" : ""), (day.est && day.hw ? "≈" : "") + day.hw));
+    const h = parseFloat(day.ht);
+    tr.appendChild(el("td", "num" + (day.est ? " est" : ""), isNaN(h) ? "" : (day.est ? "≈" : "") + h.toFixed(1)));
+    tr.appendChild(el("td", "num start", day.start));
+    const same = day.cols.every(c => c && c === day.cols[0]);
+    if (same && ncols > 1) { const c = el("td", "all", day.cols[0]); c.colSpan = ncols; tr.appendChild(c); }
+    else day.cols.forEach(c => tr.appendChild(el("td", "", c)));
+    tr.appendChild(el("td", "", day.other));
+    tb.appendChild(tr);
+  });
+  table.appendChild(tb); sheet.appendChild(table);
+
+  const foot = el("div", "foot");
+  const gp = days.filter(d => d.gp);
+  if (gp.length) {
+    const groups = []; gp.forEach(d => { const g = groups[groups.length - 1]; if (g && (d.d - g[g.length - 1].d) <= 3 * 86400000) g.push(d); else groups.push([d]); });
+    const s = el("div"); s.appendChild(el("h3", "", "Grand Prix weekends"));
+    s.appendChild(el("p", "", groups.map(g => g[0].d.getMonth() === g[g.length - 1].d.getMonth()
+      ? g.map(d => d.d.getDate()).join(", ") + " " + MONTHS[g[0].d.getMonth()]
+      : g.map(d => d.d.getDate() + " " + MONTHS[d.d.getMonth()].slice(0, 3)).join(", ")).join("; ")));
+    foot.appendChild(s);
+  }
+  const k = el("div"); k.appendChild(el("h3", "", "Key"));
+  k.appendChild(el("p", "", "NR: no racing. Start: first start of the day; other starts are in brackets. Times are UK clock time." + (days.some(d => d.est) ? " ≈ tide not printed in the programme, estimated." : "")));
+  foot.appendChild(k);
+  sheet.appendChild(foot);
+
+  const note = $("note");
+  if (skipped) { note.className = "note bad"; note.textContent = skipped + " row(s) were left out because their Date isn't in YYYY-MM-DD format. Open the app's preview to see the full data check."; }
+  else { note.className = "note"; note.textContent = days.length + " days from " + label + ". Print in landscape; \"Save as PDF\" in the print dialog makes a PDF."; }
+  document.title = "Race card " + yr;
+}
+
+async function fetchText(url) {
+  try { const r = await fetch(url, { cache: "no-cache" }); return r.ok ? await r.text() : null; } catch (e) { return null; }
+}
+let current = null;   // { year, text } for a published season
+async function showSeason(year) {
+  const text = await fetchText(PATTERN.replace("{year}", year));
+  if (text == null) { $("sheet").textContent = ""; $("sheet").appendChild(el("p", "empty", "Couldn't load the " + year + " programme.")); return; }
+  current = { year, text };
+  let recs = parseCSV(text);
+  if ($("extras").checked) { const ex = await fetchText(EXTRAS.replace("{year}", year)); if (ex) recs = recs.concat(parseCSV(ex)); }
+  render(recs, "programme-" + year + ".csv" + ($("extras").checked ? " and extras-" + year + ".csv" : ""), String(year));
+}
+function showText(text, name) {
+  current = null; $("season").value = ""; $("extrasWrap").hidden = true;
+  render(parseCSV(text), name);
+}
+
+(async function start() {
+  const y0 = new Date().getFullYear(), years = [];
+  for (let y = y0 - 1; y <= y0 + 2; y++) years.push(y);
+  const found = (await Promise.all(years.map(async y => (await fetchText(PATTERN.replace("{year}", y))) != null ? y : null))).filter(Boolean);
+  const sel = $("season"); sel.textContent = "";
+  sel.appendChild(Object.assign(el("option", "", "—"), { value: "" }));
+  found.forEach(y => sel.appendChild(Object.assign(el("option", "", String(y)), { value: String(y) })));
+  sel.addEventListener("change", () => { if (sel.value) { $("extrasWrap").hidden = false; showSeason(Number(sel.value)); } });
+  $("extras").addEventListener("change", () => { if (current) showSeason(current.year); });
+  $("file").addEventListener("change", e => {
+    const f = e.target.files[0]; if (!f) return;
+    const rd = new FileReader(); rd.onload = () => showText(String(rd.result), f.name); rd.readAsText(f); e.target.value = "";
+  });
+  $("print").addEventListener("click", () => window.print());
+
+  // Opened from the app's preview: show the file being previewed there.
+  if (/[?&]preview\b/.test(location.search)) {
+    let p = null; try { p = JSON.parse(sessionStorage.getItem("bsc-preview") || "null"); } catch (e) {}
+    if (p && p.text) { showText(p.text, p.name || "your file"); return; }
+  }
+  const want = Number((location.search.match(/[?&]year=(\d{4})/) || [])[1]);
+  const pick = found.includes(want) ? want : (found.includes(y0) ? y0 : found[found.length - 1]);
+  if (pick) { sel.value = String(pick); showSeason(pick); }
+  else { $("sheet").textContent = ""; $("sheet").appendChild(el("p", "empty", "No published season found. Open a programme file from your computer instead.")); }
+})();
+</script>
+</body>
+</html>

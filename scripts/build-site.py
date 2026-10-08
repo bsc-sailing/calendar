@@ -26,7 +26,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Folders whose files are published at the top level of the site, in order.
 # Only the files directly inside each folder are copied (not subfolders).
-PUBLISH_DIRS = ["app", "app/assets", "data", "templates"]
+PUBLISH_DIRS = ["app", "app/assets", "data", "templates", "docs"]
 
 def sources():
     """(published name, source path) for every file to publish."""
@@ -55,7 +55,12 @@ def required_files(site):
         m = re.search(key + r':\s*"([^"]+)"', index)
         if m:
             need.add(m.group(1))
-    need.update(re.findall(r'(?:href|src)="([\w.-]+\.(?:png|jpg|webmanifest|html|csv))"', index))
+    # Local files linked or fetched from any published page (guide.html, racecard.html ...)
+    for page in os.listdir(site):
+        if page.endswith(".html"):
+            html = open(os.path.join(site, page), encoding="utf-8").read()
+            need.update(re.findall(r'(?:href|src)="([\w.-]+\.(?:png|jpg|webmanifest|html|csv|xlsx|md))"', html))
+            need.update(re.findall(r'fetch\("([\w.-]+\.(?:csv|json|md))"', html))
     return need
 
 
