@@ -24,6 +24,8 @@ This is an unofficial version made from the printed programme. Check the club we
 - **≈** before a time or height means the tide isn't printed in the programme and is estimated.
 - **Season buttons** (2026, 2027 and so on) appear at the top when there is more than one season. The app opens on the current season and moves to the next one automatically once the current one has finished.
 - **Grand Prix weekend** dates carry a gold badge, on the day list and in the day details.
+- **Clock changes:** the days the clocks go forward or back are marked in the list and the day's details, since high water and sunset jump an hour by the clock.
+- **Race card:** **Race card (print or PDF)**, next to **Add to calendar** at the bottom of the list, shows the season laid out like the printed race card. Print it, or choose "Save as PDF" in the print dialog.
 - **GO SAIL** — see its own section below.
 
 ## Use it as a website, or save it as an app

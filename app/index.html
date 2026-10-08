@@ -85,6 +85,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .tok.train .num { background: var(--gold); color: var(--bg); }
 .badge { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 1px 8px; border-radius: 3px; margin-right: 6px; }
 .badge.gp { background: var(--gold-soft); color: var(--gold); border: 1px solid var(--gold); }
+.badge.clock { background: var(--surface); color: var(--water); border: 1px solid var(--water); }
 
 /* next on */
 .next { background: var(--surface); border: 1px solid var(--line); border-left: 6px solid var(--buoy); border-radius: 4px; padding: 14px 16px 16px; margin-bottom: 18px; touch-action: pan-y; cursor: grab; user-select: none; }
@@ -262,6 +263,14 @@ dialog#sail::backdrop { background: #05131c; }
 .preview .pstatus { margin: 10px 0 0; font-weight: 700; }
 .preview .pstatus.bad { color: var(--buoy); }
 .preview .check { margin-top: 12px; }
+.pbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--ink); color: var(--bg); padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -4px 16px rgba(8, 20, 30, 0.25); }
+.pbar[hidden] { display: none; }
+.pbar .pin { max-width: 720px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+.pbar .pname { flex: 1 1 100%; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pbar .pill { color: var(--bg); border-color: var(--bg); padding: 4px 11px; font-size: 0.85rem; text-decoration: none; }
+body.previewing .wrap { padding-bottom: 130px; }
+.listfoot a.pill { text-decoration: none; display: inline-block; }
+.listfoot .lfrow { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .version { color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
 .support { color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
 .support summary { cursor: pointer; }
@@ -343,6 +352,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
   <div class="brand"><a href="https://blackwatersailingclub.org.uk/" target="_blank" rel="noopener"><img class="logo" src="logo.png" alt="Blackwater Sailing Club" width="56" height="56" onerror="this.hidden=true"></a><h1 id="title">BSC Sailing Calendar</h1></div>
   <p class="sub" id="sub">Races, events, training and tides for every day of the season.</p>
   <section class="preview" id="preview" hidden></section>
+  <div class="pbar" id="pbar" hidden><div class="pin"></div></div>
   <div class="chartlink"><button class="pill navlink" type="button" id="openCourses">Race<br>Courses</button><button class="pill navlink" type="button" id="openChart">Race Marks<br>Map</button><button class="pill navlink" type="button" id="openTides">Tides &amp;<br>Weather</button><button class="pill navlink" type="button" id="openEvents">Club<br>Events</button></div>
 
   <section class="seasonbar" id="seasonbar" hidden>
@@ -372,7 +382,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
   </div>
 
   <main id="list"><p class="empty">Loading the programme…</p></main>
-  <div class="listfoot" id="listfoot" hidden><button class="pill" type="button" id="listcal"></button><p class="hint" id="calnote" role="status"></p></div>
+  <div class="listfoot" id="listfoot" hidden><div class="lfrow"><button class="pill" type="button" id="listcal"></button><a class="pill" id="listcard" href="racecard.html">Race card (print or PDF)</a></div><p class="hint" id="calnote" role="status"></p></div>
 
   <section class="check" id="check" hidden></section>
 
@@ -463,7 +473,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
    programme-YEAR.csv. See docs/updating-data.md.
 ------------------------------------------------------------------ */
 const CONFIG = {
-  version: "2.17.0", released: "2026-10-08",   // bump both here and in sw.js, and add a line to CHANGELOG.md
+  version: "2.18.0", released: "2026-10-08",   // bump both here and in sw.js, and add a line to CHANGELOG.md
   filePattern: "programme-{year}.csv",  // one file per season: programme-2026.csv, programme-2027.csv, ...
   yearsBack: 1, yearsAhead: 2,          // which years to look for around the current year
   legacyFile: "programme.csv",          // an older single file: used for its own year if no dated file covers it
@@ -554,6 +564,33 @@ function sunTimes(iso) {
 }
 function hhmm(t) { return parseInt(t.slice(0, 2), 10) * 60 + parseInt(t.slice(3, 5), 10); }
 // "Sunrise 07:05 · Sunset 18:24 · 11 h 19 min of daylight", plus a note when high water is in the dark
+/* UK clock changes: last Sunday of March (forward, 1 am) and of October (back, 2 am). */
+function lastSunday(year, month) { const d = new Date(year, month + 1, 0); d.setDate(d.getDate() - d.getDay()); return d; }
+function clockChanges(year) {
+  return [{ date: lastSunday(year, 2), dir: "forward", zone: "BST" }, { date: lastSunday(year, 9), dir: "back", zone: "GMT" }];
+}
+// What to say about the clocks on this date, or "" (the day before, the day itself).
+function clockNote(date) {
+  for (const c of clockChanges(date.getFullYear())) {
+    const diff = Math.round((c.date - new Date(date.getFullYear(), date.getMonth(), date.getDate())) / DAY);
+    const when = c.dir === "forward" ? "1 am" : "2 am";
+    if (diff === 1) return "Clocks go " + c.dir + " an hour tonight (" + when + " on Sunday). From tomorrow, times are " + c.zone + ".";
+    if (diff === 0) return "Clocks went " + c.dir + " an hour at " + when + " today, so times are " + c.zone + " from today" + (c.dir === "forward" ? " (high water and sunset are an hour later by the clock)." : " (high water and sunset are an hour earlier by the clock).");
+  }
+  return "";
+}
+// For the day list: a change between the previous listed day (exclusive) and this one (inclusive),
+// or tonight's change, as a short badge.
+function clockBadge(date, prevDate) {
+  for (const c of clockChanges(date.getFullYear())) {
+    const d0 = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const diff = Math.round((c.date - d0) / DAY);
+    if (diff === 1) return "Clocks go " + c.dir + " tonight";
+    const from = prevDate || new Date(d0.getTime() - 7 * DAY);
+    if (c.date > from && c.date <= d0) return diff === 0 ? "Clocks went " + c.dir + " today" : "Clocks went " + c.dir + " " + fmtShort.format(c.date);
+  }
+  return "";
+}
 function sunLine(iso, hw) {
   const s = sunTimes(iso);
   let t = "Sunrise " + s.rise + " · Sunset " + s.set + " · " + Math.floor(s.minutes / 60) + " h " + (s.minutes % 60) + " min of daylight";
@@ -940,6 +977,7 @@ function render() {
   if (preset) count.appendChild(pillBtn("Clear filter: " + preset.label, () => { state.preset = null; render(); }));
   $("calnote").textContent = "";
   const lf = $("listfoot");
+  $("listcard").href = SEASON && SEASON.preview ? "racecard.html?preview" : "racecard.html?year=" + YEAR + "&extras=1";
   if (clickable.length) { lf.hidden = false; const cb = $("listcal"); cb.textContent = "Add " + plural(clickable.length, "day") + " to calendar"; cb.onclick = () => exportDays(clickable, $("calnote")); } else lf.hidden = true;
   const list = $("list"); list.textContent = "";
   if (!shown.length) {
@@ -952,7 +990,7 @@ function render() {
     });
     b.style.marginTop = "10px"; e.appendChild(b); list.appendChild(e); return;
   }
-  let curKey = null, ul = null, head = null, n = 0;
+  let curKey = null, ul = null, head = null, n = 0, prevShown = null;
   const closeMonth = () => { if (head) head.querySelector("span").textContent = plural(n, "day"); };
   shown.forEach(({ d, it }) => {
     const key = d.date.getFullYear() * 12 + d.date.getMonth();
@@ -968,7 +1006,8 @@ function render() {
     if (!past) { inner.type = "button"; inner.dataset.iso = d.iso; inner.setAttribute("aria-haspopup", "dialog"); }
     const date = el("div", "date"); date.appendChild(el("span", "wd", isT ? "Today" : fmtWd.format(d.date))); date.appendChild(el("span", "dn", String(d.date.getDate())));
     const what = el("div", "what");
-    if (d.gp) { const p = el("p", ""); p.appendChild(el("span", "badge gp", "Grand Prix weekend")); what.appendChild(p); }
+    const clk = clockBadge(d.date, prevShown); prevShown = d.date;
+    if (d.gp || clk) { const p = el("p", ""); if (d.gp) p.appendChild(el("span", "badge gp", "Grand Prix weekend")); if (clk) p.appendChild(el("span", "badge clock", clk)); what.appendChild(p); }
     if (it.racing.length) what.appendChild(el("p", "start", "First start " + (st || "TBC")));
     else what.appendChild(el("p", "nr", noRacingText(d, it)));
     if (hasContent(it)) what.appendChild(tokenList(it));
@@ -1245,6 +1284,7 @@ function renderTideDetail(iso, tideByDate) {
     box.appendChild(nums);
     if (rec.alt) box.appendChild(el("p", "muted", altText(rec.alt, est)));
     box.appendChild(el("p", "", sunLine(iso, rec.time)));
+    const clk = clockNote(parseISO(iso)); if (clk) box.appendChild(el("p", "", clk));
   } else {
     box.appendChild(el("p", "muted", "No tide estimate for this date."));
   }
@@ -1519,6 +1559,7 @@ function fillSheet() {
 
   body.appendChild(el("h3", "", "Daylight"));
   body.appendChild(el("p", "", sunLine(day.iso, day.hw)));
+  const clk = clockNote(day.date); if (clk) body.appendChild(el("p", "", clk));
 
   if (day.hw || !isNaN(day.ht)) {
     body.appendChild(el("h3", "", "Tide"));
@@ -1789,6 +1830,13 @@ function loadPreview(text, name, status, card) {
   SEASONS = SEASONS.filter(x => x.year !== year).concat(s).sort((a, b) => a.year - b.year);
   try { sessionStorage.setItem("bsc-preview", JSON.stringify({ text, name })); } catch (e) {}
   activateSeason(s);
+  const bar = $("pbar"), pin = bar.querySelector(".pin"); pin.textContent = "";
+  pin.appendChild(el("span", "pname", "Previewing " + name + " (only on this device)"));
+  const a = (label, href) => { const x = el("a", "pill", label); x.href = href; return x; };
+  pin.append(a("Race card", "racecard.html?preview"), a("Format guide", "guide.html"),
+    pillBtn("Another file", () => { window.scrollTo({ top: 0, behavior: "smooth" }); $("preview").querySelector("input[type=file]").click(); }),
+    pillBtn("Stop", () => { try { sessionStorage.removeItem("bsc-preview"); } catch (e) {} location.href = "./"; }));
+  bar.hidden = false; document.body.classList.add("previewing");
   status.className = "pstatus";
   status.textContent = "Showing " + name + " as the " + year + " season: " + records.length + " rows, " + DAYS.length + " days. Only on this device.";
   card.hidden = false;
