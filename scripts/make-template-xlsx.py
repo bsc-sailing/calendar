@@ -23,7 +23,7 @@ head = Font(bold=True, color="FFFFFF"); fill = PatternFill("solid", fgColor="0E2
 lines = [
  ("BSC Sailing Calendar: season programme template", True),
  ("", False),
- ("1. Fill in the Programme sheet: one row per day per fleet (or per event or training session). Delete the sample rows first.", False),
+ ("1. Fill in the Programme sheet: one row per day per fleet (or per event or training session). In a new copy of the template, delete the sample rows first.", False),
  ("2. Keep the headings in row 1 exactly as they are. Extra columns are fine; the app ignores them.", False),
  ("3. Dates are year-month-day (2027-04-18). Times are 24-hour (14:52). Start time can also be TBC.", False),
  ("4. Fleet, Race start order, Tide source and GP weekend have drop-down lists. Fleet names must match exactly.", False),

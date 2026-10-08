@@ -42,6 +42,8 @@ For bigger changes, download the file (**…** menu → **Download**), edit it i
 4. Check the result of **Build and deploy** on the PR, as above. It reports any row that wouldn't show correctly, by line number.
 5. Merge it. The new season appears as a button at the top of the app, and becomes the one it opens on once the current season has finished. The app looks for files for last year, this year and the next two years, so there's nothing else to change.
 
+**Starting from the sailing secretary's race card.** If the programme arrives as a race-card spreadsheet (one row per day, a column per fleet), `scripts/convert-race-card.py` turns it into a first draft in this format; see the notes at the top of the script, and check what it prints. It's a starting point to edit, not a finished file.
+
 **Tides the programme doesn't print** (coaching days, Friday courses) can be left blank: the app fills them with an estimate marked `≈`, and that estimate improves automatically. To write the estimates into the file instead, see `scripts/tide/TIDES.md`, "Two ways to use this".
 
 If someone without a GitHub account prepares the file (the sailing secretary, say), point them at the format guide on the live site (`https://bsc-sailing.github.io/calendar/guide.html`): it has the template, the format, and the preview and race-card tools, so they can check it themselves. They then email it to a maintainer, who uploads it as above.
