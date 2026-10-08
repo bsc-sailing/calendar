@@ -50,6 +50,8 @@ def parse(xml_bytes: bytes) -> list:
     for item in root.findall("./channel/item")[:MAX_EVENTS]:
         title_raw = (item.findtext("title") or "").strip()
         link = (item.findtext("link") or "").strip()
+        if not re.match(r"^https://([\w-]+\.)*blackwatersailingclub\.org\.uk(/|$)", link):
+            link = ""  # only ever link to the club's own site, over https
         pub_raw = (item.findtext("pubDate") or "").strip()
         desc_raw = item.findtext("description") or ""
         try:

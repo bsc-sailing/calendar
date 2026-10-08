@@ -13,6 +13,8 @@ Problems (fail): missing columns, dates that aren't YYYY-MM-DD, start times
 that aren't HH:MM or TBC, start orders that aren't 1-9, racing rows with no
 start time, GP weekend values that aren't TRUE/FALSE, rows on one day that
 disagree about the tide.
+Also fails: a cell starting with = + @ or a tab, which a spreadsheet would run
+as a formula when someone opens the CSV ("CSV injection"); a file over 2 MB.
 Warnings (don't fail): days with no tide, dates outside the file's year.
 """
 import csv
@@ -32,6 +34,8 @@ def check(path):
     name = os.path.basename(path)
     m = re.fullmatch(r"(?:programme|extras)-(\d{4})\.csv", name)
     year = int(m.group(1)) if m else None
+    if os.path.getsize(path) > 2_000_000:
+        return [(0, f"The file is {os.path.getsize(path) // 1000} KB; a season should be well under 2 MB. Is it the right file?")], []
     with open(path, encoding="utf-8-sig", newline="") as fh:
         rows = list(csv.DictReader(fh))
         cols = [c.strip() for c in (rows[0].keys() if rows else [])]
@@ -46,6 +50,9 @@ def check(path):
         d, st, o, g = r["Date"], r["Start time"], r["Race start order"], r["GP weekend"]
         if not any(r.values()):
             continue
+        for k, v in r.items():
+            if v[:1] in ("=", "+", "@", "\t"):
+                errors.append((i, f"{k} starts with '{v[:1]}', which a spreadsheet would treat as a formula. Remove it or reword the cell"))
         if not re.fullmatch(r"\d{4}-\d\d-\d\d", d):
             errors.append((i, f"Date '{d}' isn't YYYY-MM-DD"))
             continue

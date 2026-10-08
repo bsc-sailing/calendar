@@ -1197,7 +1197,7 @@ async function renderEvents() {
     li.appendChild(el("div", "event-date", fmtEventDate(e.date) + (e.hasTime ? " · " + e.time : "")));
     li.appendChild(el("div", "event-title", e.title));
     if (e.excerpt) li.appendChild(el("p", "event-excerpt", e.excerpt));
-    if (e.link) { const a = el("a", "event-link", "Details" + (e.link.includes("/event-") ? " and registration" : "") + " →"); a.href = e.link; a.target = "_blank"; a.rel = "noopener"; li.appendChild(a); }
+    if (e.link && /^https:\/\/([\w-]+\.)*blackwatersailingclub\.org\.uk(\/|$)/.test(e.link)) { const a = el("a", "event-link", "Details" + (e.link.includes("/event-") ? " and registration" : "") + " →"); a.href = e.link; a.target = "_blank"; a.rel = "noopener"; li.appendChild(a); }
     list.appendChild(li);
   });
 }
