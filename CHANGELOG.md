@@ -2,6 +2,9 @@
 
 Version numbers are in `CONFIG.version` in `app/index.html` and `VERSION` in `app/sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**. Changes merged before the next version number is chosen are listed under **Unreleased**.
 
+## Unreleased
+- Format guide: a Google Sheets template (make your own copy) alongside the Excel one, with how to download the CSV from Google Sheets.
+
 ## 2.17.0 – 8 Oct 2026
 - **Preview a programme file:** open the app with `?preview` and choose a programme CSV from your own device. The app shows it as that season, with the data check (now with line numbers for each problem). Nothing is uploaded.
 - **Race card** (`racecard.html`): any published season, or a file from your device, laid out like the printed race card for printing on A4 landscape or saving as a PDF.

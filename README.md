@@ -80,7 +80,7 @@ The season programme, extra dates and course cards are files in the `data/` fold
 For whoever prepares the programme, with or without a GitHub account, the **[format guide](https://bsc-sailing.github.io/calendar/guide.html)** on the live site has everything in one place:
 
 - the column-by-column format, with a worked example comparing a race-card day with the app's rows (the same text as [docs/data-format.md](docs/data-format.md));
-- an **Excel template** with the headings, formats and drop-down lists set up (`templates/programme-template.xlsx`, regenerated with `scripts/make-template-xlsx.py`);
+- a **Google Sheets template** (a "make a copy" link to a sheet in the maintainer's Google Drive, which must stay shared as "Anyone with the link: Viewer") and an **Excel template** (`templates/programme-template.xlsx`, regenerated with `scripts/make-template-xlsx.py`), both with the headings, formats and drop-down lists set up;
 - **[Preview a file](https://bsc-sailing.github.io/calendar/?preview):** open a programme CSV from your own device in the app, with a data check that gives line numbers. Nothing is uploaded;
 - **[Race card](https://bsc-sailing.github.io/calendar/racecard.html):** any published season, or a file from your device, laid out like the printed race card, for printing or saving as a PDF.
 
