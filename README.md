@@ -116,6 +116,10 @@ Changes go through pull requests, so each one has a record of what changed and w
 
 Club events (daily), the tide reference (weekly), the published-tide check (daily) and extra-date requests each run as a GitHub Actions workflow. What they touch, the `RELEASE_TOKEN` they share, and what to check if one stops are in [docs/automation.md](docs/automation.md).
 
+### Security
+
+Who can change what, why a data file can't run code in the app, and the settings worth keeping on are in [docs/security.md](docs/security.md).
+
 ## Version and support
 
 The version number is at the bottom of the app. Tap **Support info** there for the app version, the seasons loaded (with the date each data file was last updated), whether the offline copy is active, which saved copy is in use, and when Club Events and the tide reference were each last updated — a quick way to spot either of their scheduled jobs having quietly stopped, without needing to check GitHub. That is usually enough to work out whether someone is seeing an old version. Add `?check` to the address for a data check. `CHANGELOG.md` lists what changed in each version.

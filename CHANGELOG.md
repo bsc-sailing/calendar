@@ -4,6 +4,9 @@ Version numbers are in `CONFIG.version` in `app/index.html` and `VERSION` in `ap
 
 ## Unreleased
 - Format guide: a Google Sheets template (make your own copy) alongside the Excel one, with how to download the CSV from Google Sheets.
+- Club-event links are only shown when they point to the club's own site over https, checked both when the feed is fetched and in the app.
+- The data check rejects cells that a spreadsheet would run as a formula (starting with `=`, `+`, `@` or a tab), and files over 2 MB.
+- `docs/security.md`: who can change what, how data is kept to plain text, and settings worth keeping on.
 
 ## 2.17.0 – 8 Oct 2026
 - **Preview a programme file:** open the app with `?preview` and choose a programme CSV from your own device. The app shows it as that season, with the data check (now with line numbers for each problem). Nothing is uploaded.
