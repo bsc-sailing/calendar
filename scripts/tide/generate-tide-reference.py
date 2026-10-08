@@ -19,7 +19,7 @@ output. The actual harmonic fit and prediction logic is unchanged, reused
 directly from tidefit.py / tide_predict.py in this folder.
 
 Run:
-    python3 generate-tide-reference.py --repo-root ../.. --months-ahead 24 --out ../../tides.json
+    python3 generate-tide-reference.py --data-dir ../../data --months-ahead 24 --out ../../data/tides.json
 """
 import argparse
 import glob
@@ -34,10 +34,10 @@ from tide_predict import height_at, predict_day, day_peaks
 from daytime import choose
 
 
-def load_all_programme_points(repo_root):
+def load_all_programme_points(data_dir):
     """Every Programme-sourced (Date, High water, Tide height) row, pooled
-    across every programme-*.csv in the repo root — not just one season."""
-    paths = sorted(glob.glob(os.path.join(repo_root, "programme-*.csv")))
+    across every programme-*.csv in the data folder — not just one season."""
+    paths = sorted(glob.glob(os.path.join(data_dir, "programme-*.csv")))
     pts, seen, files_used = [], set(), []
     import csv
     for path in paths:
@@ -59,9 +59,9 @@ def load_all_programme_points(repo_root):
     return pts, files_used
 
 
-def load_official(repo_root):
+def load_official(data_dir):
     """Official (ADMIRALTY) daytime high waters collected by fetch-official-tides.py."""
-    path = os.path.join(repo_root, "tides-official.csv")
+    path = os.path.join(data_dir, "tides-official.csv")
     if not os.path.exists(path):
         return []
     import csv
@@ -120,16 +120,16 @@ def build_model(points):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--repo-root", default="../..", help="folder containing the programme-*.csv files")
+    ap.add_argument("--data-dir", default="../../data", help="folder containing the programme-*.csv files")
     ap.add_argument("--months-ahead", type=int, default=24)
-    ap.add_argument("--out", default="../../tides.json")
+    ap.add_argument("--out", default="../../data/tides.json")
     args = ap.parse_args()
 
-    points, files_used = load_all_programme_points(args.repo_root)
+    points, files_used = load_all_programme_points(args.data_dir)
     programme_points = list(points)
     cfg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "official-tides.json")
     cfg = json.load(open(cfg_path)) if os.path.exists(cfg_path) else {}
-    official = load_official(args.repo_root)
+    official = load_official(args.data_dir)
     real_prog = {d_: (hw_, ht_) for _, ht_, d_, hw_ in points}
     offset = station_offset(official, real_prog, int(cfg.get("min_overlap_days", 3))) if official else None
     # Official points join the training data only once the station offset is

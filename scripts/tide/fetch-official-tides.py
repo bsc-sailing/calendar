@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 fetch-official-tides.py: fetch the next 7 days of published high waters and
-record them in tides-official.csv at the repo root.
+record them in data/tides-official.csv.
 
 Two sources (official-tides.json, "source"):
   club       (default) the club website's next-7-days table: National
@@ -32,7 +32,7 @@ you can pick one. With no API key, it explains how to get one and exits
 without failing, so the scheduled run stays green until it's set up.
 
 Run (from this folder):
-    python3 fetch-official-tides.py --repo-root ../..
+    python3 fetch-official-tides.py --data-dir ../../data
 """
 import argparse
 import csv
@@ -150,7 +150,7 @@ def load_existing(path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--repo-root", default="../..")
+    ap.add_argument("--data-dir", default="../../data")
     args = ap.parse_args()
 
     cfg = json.load(open(os.path.join(HERE, "official-tides.json")))
@@ -185,7 +185,7 @@ def main():
 
     # Our current estimate for each date, from the tides.json already in the repo
     est = {}
-    tj = os.path.join(args.repo_root, "tides.json")
+    tj = os.path.join(args.data_dir, "tides.json")
     if os.path.exists(tj):
         for t in json.load(open(tj)).get("tides", []):
             if t.get("source") == "Estimated":
@@ -194,7 +194,7 @@ def main():
     if os.path.exists(tj):
         prog_dates = {t["date"] for t in json.load(open(tj)).get("tides", []) if t.get("source") == "Programme"}
 
-    path = os.path.join(args.repo_root, "tides-official.csv")
+    path = os.path.join(args.data_dir, "tides-official.csv")
     rows = load_existing(path)
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     lines = ["| Date | Official HW | Our estimate | Difference |", "| --- | --- | --- | --- |"]

@@ -7,6 +7,7 @@ problem, unlike fetching the RSS directly from the browser).
 Runs stdlib-only so the GitHub Action needs no pip install step.
 """
 import json
+import os
 import re
 import sys
 import urllib.request
@@ -16,7 +17,7 @@ from email.utils import parsedate_to_datetime
 from html import unescape
 
 FEED_URL = "https://blackwatersailingclub.org.uk/events/RSS"
-OUT_FILE = "events.json"
+OUT_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "events.json")
 MAX_EVENTS = 12          # don't let the app screen grow unbounded
 EXCERPT_LEN = 220        # characters of plain-text summary kept per event
 

@@ -1,6 +1,6 @@
 name: Update club events
 
-# Refreshes events.json from the club's public RSS feed. This never touches
+# Refreshes data/events.json from the club's public RSS feed. This never touches
 # programme data or the app itself — only that one file.
 #
 # Pushes as jfairhead (via the RELEASE_TOKEN secret), not as the default
@@ -9,7 +9,7 @@ name: Update club events
 # Apps. Authenticating as a maintainers-team member sidesteps that: the push
 # is allowed for the same reason any of your own pushes are. RELEASE_TOKEN
 # is a fine-grained PAT scoped to only this repo, Contents: Read and write —
-# see README.md ("Club Events") for the full setup.
+# see docs/automation.md for the full setup.
 
 on:
   schedule:
@@ -38,9 +38,9 @@ jobs:
           # committed (if anything — there's nothing yet on a first run).
           python3 - <<'PYEOF_INNER'
           import json, os, subprocess
-          new = json.load(open("events.json")); new.pop("generated", None)
+          new = json.load(open("data/events.json")); new.pop("generated", None)
           try:
-              old_raw = subprocess.run(["git", "show", "HEAD:events.json"], capture_output=True, text=True, check=True).stdout
+              old_raw = subprocess.run(["git", "show", "HEAD:data/events.json"], capture_output=True, text=True, check=True).stdout
               old = json.loads(old_raw); old.pop("generated", None)
           except Exception:
               old = None
@@ -55,6 +55,6 @@ jobs:
         run: |
           git config user.name "jfairhead"
           git config user.email "17782781+jfairhead@users.noreply.github.com"
-          git add events.json
+          git add data/events.json
           git commit -m "Update club events (automated)"
           git push

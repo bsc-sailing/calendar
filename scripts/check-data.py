@@ -6,7 +6,7 @@ and extras-YEAR.csv, and stops a deploy (or marks a pull request with a red
 cross) if a file would show wrongly in the app. Each problem names the file
 and line, so it shows on that line in a pull request's "Files changed" tab.
 
-    python3 scripts/check-data.py            # checks data/ (or the repo root, before the split)
+    python3 scripts/check-data.py            # checks every season file in data/
     python3 scripts/check-data.py some.csv   # checks just that file
 
 Problems (fail): missing columns, dates that aren't YYYY-MM-DD, start times
@@ -75,9 +75,9 @@ def main():
     if len(sys.argv) > 1:
         paths = sys.argv[1:]
     else:
-        data = os.path.join(ROOT, "data") if os.path.isdir(os.path.join(ROOT, "data")) else ROOT
+        data = os.path.join(ROOT, "data")
         paths = sorted(p for pat in ("programme-*.csv", "extras-*.csv") for p in glob.glob(os.path.join(data, pat))
-                       if not p.endswith("programme-template.csv"))
+                       )
     failed = False
     for path in paths:
         rel = os.path.relpath(path, ROOT)

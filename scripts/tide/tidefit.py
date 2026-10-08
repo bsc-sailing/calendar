@@ -11,7 +11,7 @@ water TIME and HEIGHT for ~113 days across the season, not a continuous
 water-level record. Real harbour-authority tide tables are built from a
 proper tidal-constituent analysis of continuous gauge data (which we don't
 have, and don't have permission to reproduce — see note on copyright in
-README.md, "Adding a new season"). This is a lighter-weight approximation:
+docs/updating-data.md, "Add a new season"). This is a lighter-weight approximation:
 it fits a small, standard set of tidal constituents against the printed
 high-water points using ordinary linear least squares, then uses the
 resulting model to predict a plausible high water time and height for any

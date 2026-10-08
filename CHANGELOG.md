@@ -1,6 +1,12 @@
 # Changelog
 
-Version numbers are in `CONFIG.version` in `index.html` and `VERSION` in `sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**.
+Version numbers are in `CONFIG.version` in `app/index.html` and `VERSION` in `app/sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**. Changes merged before the next version number is chosen are listed under **Unreleased**.
+
+## Unreleased
+- The site is built and published by a GitHub Actions workflow (`deploy.yml`) on every push to `main`, after checking the season data. Pull requests get the same check without publishing. New versions are tagged automatically.
+- Repo split into folders: `app/` (the app), `app/assets/` (images), `data/` (everything the app reads), `templates/`, `docs/`. The live site's addresses are unchanged.
+- `sync-release.sh` applies a release zip as a pull request (`release/vX.Y.Z`), opens it with the GitHub CLI if available, and offers to merge it. Backup tags are replaced by reverting the PR.
+- New guides in `docs/`: updating the data, the data format, releasing, and the scheduled jobs. The weekly tide job now shares the daily tide check's concurrency group, so they never write `tides.json` at once.
 
 ## 2.16.6 – 6 Oct 2026
 - Extra-date requests are recognised by the form's questions, not the issue title, so retyping the title no longer stops a request being processed. Once a request is checked, its title is set automatically to "Extra date: YYYY-MM-DD Name".

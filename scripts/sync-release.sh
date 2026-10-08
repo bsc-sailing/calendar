@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# sync-release.sh — apply a downloaded bsc-sailing-app.zip to this repo,
-# back up the previous version, commit, push, tag, and confirm it's live.
+# sync-release.sh — apply a downloaded bsc-sailing-app.zip to this repo as a
+# pull request, optionally merge it, and confirm it's live.
 #
 # The release's version comes from release-manifest.json in the zip (and is
 # checked against index.html, sw.js and CHANGELOG.md). A zip older than what's
@@ -8,6 +8,13 @@
 # this script, it switches to that copy and carries on. Once applied, the zip
 # is moved to ~/Downloads/bsc-sailing-app-applied/, so the next download keeps
 # the plain name.
+#
+# The zip's files go onto a new branch (release/vX.Y.Z), which is pushed and
+# opened as a pull request, so every release has its own PR in the history.
+# With the GitHub CLI (gh) installed and signed in, it opens the PR for you
+# and offers to merge it straight away using your admin bypass; without gh,
+# it prints the link to open the PR in your browser. Merging publishes the
+# site (.github/workflows/deploy.yml), which also tags the version.
 #
 # Usage:
 #   ./scripts/sync-release.sh                 # picks the newest zip in ~/Downloads
@@ -33,7 +40,9 @@ ZIP_GLOB="bsc-sailing-app*.zip"
 SELF_PATH="scripts/sync-release.sh"
 # Files the scheduled jobs rewrite on their own: a release may replace them,
 # and the next scheduled run regenerates them, so they never count as conflicts.
-BOT_FILES=("events.json" "tides.json" "tides-official.csv")
+BOT_FILES=("data/events.json" "data/tides.json" "data/tides-official.csv")
+INDEX="app/index.html"
+SW="app/sw.js"
 
 # ---- helpers
 c_bold=$'\033[1m'; c_grn=$'\033[32m'; c_red=$'\033[31m'; c_yel=$'\033[33m'; c_off=$'\033[0m'
@@ -81,7 +90,7 @@ REMOTE_URL="$(git remote get-url origin 2>/dev/null || true)"
 [[ "$REMOTE_URL" == *"$EXPECTED_REMOTE"* ]] || die "origin is '$REMOTE_URL', not $EXPECTED_REMOTE. Wrong folder?"
 
 GIT_EMAIL="$(git config user.email || true)"
-[[ "$GIT_EMAIL" == *"$EXPECTED_EMAIL_SUFFIX" ]] || die "git user.email is '$GIT_EMAIL', expected something ending $EXPECTED_EMAIL_SUFFIX. Check .gitconfig-bsc is set up (see README)."
+[[ "$GIT_EMAIL" == *"$EXPECTED_EMAIL_SUFFIX" ]] || die "git user.email is '$GIT_EMAIL', expected something ending $EXPECTED_EMAIL_SUFFIX. Set it for this repo with: git config user.email <your GitHub noreply address>"
 
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 [[ "$CURRENT_BRANCH" == "main" ]] || die "On branch '$CURRENT_BRANCH', not main. Switch first: git checkout main"
@@ -128,14 +137,17 @@ if [[ -f "$MANIFEST" ]]; then
   NEW_VERSION="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("version",""))' "$MANIFEST")"
 fi
 if [[ -f "$WORK_DIR/index.html" ]]; then
-  IDX_VERSION="$(read_index_version "$WORK_DIR/index.html")"
-  [[ -n "$IDX_VERSION" ]] || die "index.html is in the zip but has no readable version number."
+  die "This zip has index.html at the top level, so it was built before the repo moved the app into app/. Ask for a zip built for the current layout."
+fi
+if [[ -f "$WORK_DIR/$INDEX" ]]; then
+  IDX_VERSION="$(read_index_version "$WORK_DIR/$INDEX")"
+  [[ -n "$IDX_VERSION" ]] || die "$INDEX is in the zip but has no readable version number."
   [[ -z "$NEW_VERSION" ]] && NEW_VERSION="$IDX_VERSION"
   # every place the version appears must agree, or the release was built wrong
   MISMATCH=""
   [[ "$IDX_VERSION" == "$NEW_VERSION" ]] || MISMATCH+=" index.html says $IDX_VERSION;"
-  if [[ -f "$WORK_DIR/sw.js" ]]; then
-    SW_VERSION="$(grep -o 'VERSION = "[0-9][0-9.]*"' "$WORK_DIR/sw.js" | head -n1 | grep -o '[0-9][0-9.]*' || true)"
+  if [[ -f "$WORK_DIR/$SW" ]]; then
+    SW_VERSION="$(grep -o 'VERSION = "[0-9][0-9.]*"' "$WORK_DIR/$SW" | head -n1 | grep -o '[0-9][0-9.]*' || true)"
     [[ "$SW_VERSION" == "$NEW_VERSION" ]] || MISMATCH+=" sw.js says ${SW_VERSION:-nothing};"
   fi
   if [[ -f "$WORK_DIR/CHANGELOG.md" ]]; then
@@ -148,14 +160,14 @@ else
 fi
 
 if $PARTIAL; then
-  warn "No index.html in this zip, so it's a partial update (docs or single files, no version tag)."
+  warn "No $INDEX in this zip, so it's a partial update (docs or single files, no version tag)."
   info "Files in this zip:"
   ( cd "$WORK_DIR" && find . -type f ! -name release-manifest.json ) | sed 's/^/  /'
 fi
 
 # ---- if the zip has a newer copy of this script, switch to it now, so the
 # rest of the run uses the new rules. It's committed with everything else.
-PRE_VERSION="$(read_index_version "$REPO_ROOT/index.html")"
+PRE_VERSION="$(read_index_version "$REPO_ROOT/$INDEX")"
 NOT_OLDER=true
 if ! $PARTIAL && [[ -n "$PRE_VERSION" ]] && [[ "$(ver_cmp "$NEW_VERSION" "$PRE_VERSION")" == "-1" ]]; then NOT_OLDER=false; fi
 if $NOT_OLDER && [[ -f "$WORK_DIR/$SELF_PATH" ]] && ! cmp -s "$WORK_DIR/$SELF_PATH" "$REPO_ROOT/$SELF_PATH" && [[ -z "${SYNC_REEXEC:-}" ]]; then
@@ -192,7 +204,7 @@ if [[ "$BEHIND" -gt 0 ]]; then
 fi
 
 # ---- compare with what's in the repo now (after catching up with GitHub)
-CURRENT_VERSION="$(read_index_version "$REPO_ROOT/index.html")"
+CURRENT_VERSION="$(read_index_version "$REPO_ROOT/$INDEX")"
 if ! $PARTIAL; then
   echo
   info "${c_bold}In this checkout: ${CURRENT_VERSION:-none}${c_off}"
@@ -275,19 +287,14 @@ else
   confirm "Apply this partial update (no version tag will be created)?" || { info "Stopped."; exit 0; }
 fi
 
-# ---- back up the current version as a tag, before changing anything —
-# skipped for a partial update, since there's no new version to back up in
-# front of (the existing v$CURRENT_VERSION tag already covers this state)
-if ! $PARTIAL; then
-  BACKUP_TAG="backup-before-v$NEW_VERSION"
-  if git rev-parse "$BACKUP_TAG" >/dev/null 2>&1; then
-    info "Tag $BACKUP_TAG already exists — skipping (probably a re-run)."
-  else
-    git tag -a "$BACKUP_TAG" -m "Live version before v$NEW_VERSION"
-    git push origin "$BACKUP_TAG"
-    ok "Pushed backup tag $BACKUP_TAG"
-  fi
+# ---- the release goes on its own branch, which becomes the pull request
+if $PARTIAL; then BRANCH="update/$(date +%Y%m%d-%H%M%S)"; else BRANCH="release/v$NEW_VERSION"; fi
+if git rev-parse -q --verify "refs/heads/$BRANCH" >/dev/null || git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+  die "Branch $BRANCH already exists (here or on GitHub), probably from an earlier run. Finish or close that PR first, or delete the branch: git branch -D $BRANCH; git push origin --delete $BRANCH"
 fi
+git checkout -q -b "$BRANCH"
+back_to_main() { git checkout -q main; }
+abandon_branch() { git reset -q --hard; back_to_main; git branch -q -D "$BRANCH"; }
 
 # ---- copy the new files in (does not delete files that aren't in the zip —
 # if a release is meant to remove a file, do that with a manual git rm)
@@ -305,14 +312,15 @@ echo
 
 if [[ -z "$(git status --porcelain)" ]]; then
   warn "Nothing changed after copying — the working tree already matched this zip."
+  abandon_branch
   archive_zip
   exit 0
 fi
 
 if $PARTIAL; then
-  confirm "Commit and push this partial update?" || { info "Stopped. Changes are staged but not committed — 'git restore --staged .' to undo."; exit 0; }
+  confirm "Commit it and open a pull request?" || { abandon_branch; info "Stopped. Nothing was changed."; exit 0; }
 else
-  confirm "Commit and push v$NEW_VERSION?" || { info "Stopped. Changes are staged but not committed — 'git restore --staged .' to undo."; exit 0; }
+  confirm "Commit v$NEW_VERSION and open a pull request?" || { abandon_branch; info "Stopped. Nothing was changed."; exit 0; }
 fi
 
 # ---- commit message: a version header for a full release (with notes pulled
@@ -329,30 +337,43 @@ else
   fi
 fi
 
-git commit -m "$COMMIT_MSG"
-git push
+git commit -q -m "$COMMIT_MSG"
+git push -q -u origin "$BRANCH"
+ok "Pushed branch $BRANCH."
 
-if $PARTIAL; then
-  ok "Pushed partial update."
+if $PARTIAL; then PR_TITLE="$(printf '%s' "$COMMIT_MSG" | head -n1)"; else PR_TITLE="v$NEW_VERSION"; fi
+PR_BODY="$(printf '%s\n\n---\nApplied from %s by scripts/sync-release.sh.' "$(printf '%s' "$COMMIT_MSG" | tail -n +3)" "$(basename "$ZIP_PATH")")"
+COMPARE_URL="https://$EXPECTED_REMOTE/compare/main...$BRANCH?expand=1"
+
+if ! command -v gh >/dev/null 2>&1 || ! gh auth status >/dev/null 2>&1; then
+  back_to_main
   archive_zip
+  warn "The GitHub CLI (gh) isn't installed or signed in, so open the pull request in your browser:"
+  info "  $COMPARE_URL"
+  info "Merging it publishes the site and tags the version."
   exit 0
 fi
 
-if git rev-parse "v$NEW_VERSION" >/dev/null 2>&1; then
-  warn "Tag v$NEW_VERSION already exists — not re-tagging."
-else
-  git tag "v$NEW_VERSION"
-  git push origin "v$NEW_VERSION"
-fi
-
-ok "Pushed and tagged v$NEW_VERSION."
+PR_URL="$(gh pr create --base main --head "$BRANCH" --title "$PR_TITLE" --body "$PR_BODY")"
+ok "Opened $PR_URL"
+back_to_main
 archive_zip
+
+if ! confirm "Merge it now (uses your admin bypass)?"; then
+  info "Left open for review. Merging it publishes the site and tags the version."
+  exit 0
+fi
+gh pr merge "$PR_URL" --merge --admin --delete-branch
+git pull -q --ff-only
+ok "Merged."
+
+if $PARTIAL; then exit 0; fi
 echo
 
 # ---- poll the live site until the new version shows, rather than guessing how long to wait
 PAGES_URL="https://bsc-sailing.github.io/calendar/"
-info "Checking $PAGES_URL for v$NEW_VERSION (up to 2 minutes) ..."
-for i in $(seq 1 12); do
+info "Checking $PAGES_URL for v$NEW_VERSION (up to 4 minutes) ..."
+for i in $(seq 1 24); do
   LIVE_VERSION="$(curl -fsSL "$PAGES_URL" 2>/dev/null | grep -o 'version: "[0-9][0-9.]*"' | head -n1 | grep -o '[0-9][0-9.]*' || true)"
   if [[ "$LIVE_VERSION" == "$NEW_VERSION" ]]; then
     ok "Live: v$LIVE_VERSION"
@@ -360,4 +381,4 @@ for i in $(seq 1 12); do
   fi
   sleep 10
 done
-warn "Still showing v${LIVE_VERSION:-unknown} after 2 minutes — GitHub Pages can be slow to rebuild. Check $PAGES_URL manually in a bit."
+warn "Still showing v${LIVE_VERSION:-unknown} after 4 minutes. Check the repo's Actions tab ("Build and deploy") for a failed run."

@@ -7,7 +7,7 @@ This finds every local high-water peak in the target day (usually two) and
 returns the daytime one (see daytime.py), or the one closest to --near. It does NOT
 extrapolate indefinitely — the further a date is from the training window
 (see tide-model.json's training_date_range), the less this should be
-trusted; see README.md ("Adding a new season") for how this fits into the
+trusted; see docs/updating-data.md ("Add a new season") for how this fits into the
 yearly workflow.
 
 Single date:

@@ -1,6 +1,6 @@
 # Turns an approved "Add an extra date" issue into a pull request that adds a
-# row to extras-YEAR.csv. Nothing reaches the app until a maintainer approves
-# and merges that PR. See README, "Extra dates".
+# row to data/extras-YEAR.csv. Nothing reaches the app until a maintainer approves
+# and merges that PR. See docs/automation.md, "Extra-date requests".
 name: Extra date request
 
 on:
@@ -72,7 +72,7 @@ jobs:
       - name: Add the row
         id: add
         if: steps.gate.outputs.go == 'true'
-        run: python3 scripts/add-extra-date.py --event "$GITHUB_EVENT_PATH" --repo-root .
+        run: python3 scripts/add-extra-date.py --event "$GITHUB_EVENT_PATH" --data-dir data
 
       - name: Explain what needs fixing
         if: steps.gate.outputs.go == 'true' && steps.add.outputs.ok != 'true'
@@ -91,7 +91,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
-          git add -- extras-*.csv
+          git add -- data/extras-*.csv
           git commit -m "Add extra date from #$ISSUE"
           git push --force origin "$BRANCH"
           if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
