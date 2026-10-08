@@ -39,6 +39,7 @@ td.day { white-space: nowrap; }
 tr.month td { background: var(--month); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.8rem; padding: 3px 6px; }
 tr.gp td { background: var(--gold-soft); }
 tr.nr td.start { font-weight: 700; }
+.clk-tag { display: inline-block; margin-left: 4px; padding: 0 3px; border-radius: 3px; border: 1px solid var(--water); color: var(--water); font-size: 0.66rem; font-weight: 700; vertical-align: 1px; white-space: nowrap; }
 .gp-tag { display: inline-block; margin-left: 4px; padding: 0 3px; border-radius: 3px; background: var(--gold); color: #fff; font-size: 0.68rem; font-weight: 700; vertical-align: 1px; }
 .est { color: var(--muted); }
 td.all { text-align: center; font-weight: 600; }
@@ -68,7 +69,7 @@ col.c-ev { width: 16%; }
   <label class="file" title="Open a programme CSV from this computer. Nothing is uploaded.">Open a file… <input type="file" id="file" accept=".csv,text/csv"></label>
   <label id="extrasWrap"><input type="checkbox" id="extras"> Include extra dates</label>
   <span class="spacer"></span>
-  <a href="./">Back to the app</a>
+  <a href="./" id="back">Back to the app</a>
   <a href="guide.html">Format guide</a>
   <button type="button" class="primary" id="print">Print / Save as PDF</button>
 </div>
@@ -102,6 +103,17 @@ function parseCSV(text) {
 
 const isTime = s => /^\d\d:\d\d$/.test(s || "");
 const uniq = a => [...new Set(a.filter(Boolean))];
+function lastSunday(y, m) { const d = new Date(y, m + 1, 0, 12); d.setDate(d.getDate() - d.getDay()); return d; }
+// A UK clock change between the previous row's date (exclusive) and this one (inclusive), or tonight's.
+function clockTag(d, prev) {
+  for (const [c, dir] of [[lastSunday(d.getFullYear(), 2), "forward"], [lastSunday(d.getFullYear(), 9), "back"]]) {
+    const diff = Math.round((c - d) / 86400000);
+    if (diff === 1) return "Clocks " + dir + " tonight";
+    const from = prev || new Date(d.getTime() - 7 * 86400000);
+    if (c > from && c <= d) return diff === 0 ? "Clocks " + dir : "Clocks went " + dir + " " + c.getDate() + " " + MONTHS[c.getMonth()].slice(0, 3);
+  }
+  return "";
+}
 
 /* One table row per date; one column per start order, plus one for everything without a fleet. */
 function build(records) {
@@ -172,7 +184,7 @@ function render(records, label, year) {
   r2.appendChild(el("th", "", "BJRC & cruiser races, training, events"));
   thead.append(r1, r2); table.appendChild(thead);
 
-  const tb = el("tbody"); let month = -1;
+  const tb = el("tbody"); let month = -1, prevD = null;
   days.forEach(day => {
     if (day.d.getMonth() !== month) {
       month = day.d.getMonth();
@@ -181,6 +193,8 @@ function render(records, label, year) {
     const tr = el("tr", (day.gp ? "gp " : "") + (day.nr ? "nr" : ""));
     const dc = el("td", "day", WD[day.d.getDay()] + " " + day.d.getDate());
     if (day.gp) dc.appendChild(el("span", "gp-tag", "GP"));
+    const clk = clockTag(day.d, prevD); prevD = day.d;
+    if (clk) dc.appendChild(el("span", "clk-tag", clk));
     tr.appendChild(dc);
     tr.appendChild(el("td", "num" + (day.est ? " est" : ""), (day.est && day.hw ? "≈" : "") + day.hw));
     const h = parseFloat(day.ht);
@@ -205,7 +219,7 @@ function render(records, label, year) {
     foot.appendChild(s);
   }
   const k = el("div"); k.appendChild(el("h3", "", "Key"));
-  k.appendChild(el("p", "", "NR: no racing. Start: first start of the day; other starts are in brackets. Times are UK clock time." + (days.some(d => d.est) ? " ≈ tide not printed in the programme, estimated." : "")));
+  k.appendChild(el("p", "", "NR: no racing. Start: first start of the day; other starts are in brackets. Times are UK clock time (GMT, or BST from the last Sunday in March to the last Sunday in October)." + (days.some(d => d.est) ? " ≈ tide not printed in the programme, estimated." : "")));
   foot.appendChild(k);
   sheet.appendChild(foot);
 
@@ -248,7 +262,9 @@ function showText(text, name) {
   $("print").addEventListener("click", () => window.print());
 
   // Opened from the app's preview: show the file being previewed there.
+  if (/[?&]extras=1\b/.test(location.search)) $("extras").checked = true;
   if (/[?&]preview\b/.test(location.search)) {
+    $("back").href = "./?preview"; $("back").textContent = "Back to the preview";
     let p = null; try { p = JSON.parse(sessionStorage.getItem("bsc-preview") || "null"); } catch (e) {}
     if (p && p.text) { showText(p.text, p.name || "your file"); return; }
   }

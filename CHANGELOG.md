@@ -2,7 +2,10 @@
 
 Version numbers are in `CONFIG.version` in `app/index.html` and `VERSION` in `app/sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**. Changes merged before the next version number is chosen are listed under **Unreleased**.
 
-## Unreleased
+## 2.18.0 – 8 Oct 2026
+- **Race card from the app:** a "Race card (print or PDF)" button next to "Add to calendar" at the bottom of the list opens the season as a printable race card (extra dates included).
+- **Clock changes:** the day list marks the day the clocks go forward or back (and the day before), and the day's details and Tides & Weather say so, since high water and sunset jump an hour by the clock. The race card marks them too.
+- **Preview:** once a file is loaded, a bar along the bottom of the screen stays in view with Race card, Format guide, Another file and Stop. The race card opened from a preview links back to the preview.
 - Format guide: a Google Sheets template (make your own copy) alongside the Excel one, with how to download the CSV from Google Sheets.
 - Club-event links are only shown when they point to the club's own site over https, checked both when the feed is fetched and in the app.
 - The data check rejects cells that a spreadsheet would run as a formula (starting with `=`, `+`, `@` or a tab), and files over 2 MB.
