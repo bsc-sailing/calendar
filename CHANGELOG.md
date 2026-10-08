@@ -7,6 +7,7 @@ Version numbers are in `CONFIG.version` in `app/index.html` and `VERSION` in `ap
 - Repo split into folders: `app/` (the app), `app/assets/` (images), `data/` (everything the app reads), `templates/`, `docs/`. The live site's addresses are unchanged.
 - `sync-release.sh` applies a release zip as a pull request (`release/vX.Y.Z`), opens it with the GitHub CLI if available, and offers to merge it. Backup tags are replaced by reverting the PR.
 - New guides in `docs/`: updating the data, the data format, releasing, and the scheduled jobs. The weekly tide job now shares the daily tide check's concurrency group, so they never write `tides.json` at once.
+- Christmas Challenge (22 Dec) now starts at 10:00, not 11:15.
 
 ## 2.16.6 – 6 Oct 2026
 - Extra-date requests are recognised by the form's questions, not the issue title, so retyping the title no longer stops a request being processed. Once a request is checked, its title is set automatically to "Extra date: YYYY-MM-DD Name".
