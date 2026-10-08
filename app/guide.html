@@ -29,6 +29,8 @@ main { padding: 18px 16px 48px; }
 .step a.btn { align-self: flex-start; margin-top: 4px; background: var(--water); color: #fff; text-decoration: none; border-radius: 8px; padding: 7px 12px; font-weight: 700; font-size: 0.92rem; }
 @media (prefers-color-scheme: dark) { .step a.btn { color: #0B1A24; } }
 .step .more { font-size: 0.85rem; }
+.step .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.step .btns a.btn { margin-top: 0; }
 .step .more a { color: var(--water); }
 #doc h1 { font-size: 1.5rem; margin: 8px 0 6px; }
 #doc h2 { font-size: 1.2rem; margin: 26px 0 6px; padding-top: 10px; border-top: 1px solid var(--line); }
@@ -51,9 +53,9 @@ main { padding: 18px 16px 48px; }
 <main>
   <div class="steps">
     <div class="step"><b>1. Start from the template</b><p>Column headings, formats and drop-down lists already set up, with sample rows to copy.</p>
-      <a class="btn" href="programme-template.xlsx" download>Excel template</a>
-      <span class="more">Or the <a href="programme-template.csv" download>CSV template</a>, or <a href="programme-2026.csv" download>last year's full file</a>.</span></div>
-    <div class="step"><b>2. Preview it in the app</b><p>Open your saved CSV in the app on your own computer or phone, with the data check. Nothing is uploaded or published.</p>
+      <span class="btns"><a class="btn" href="https://docs.google.com/spreadsheets/d/1_f96_ONFH_KBwGspTjlORB28uWOV743X_6ce3sHiDSQ/copy" target="_blank" rel="noopener">Google Sheets</a><a class="btn" href="programme-template.xlsx" download>Excel</a></span>
+      <span class="more">Google Sheets makes your own copy to edit. Or the <a href="programme-template.csv" download>CSV template</a>, or <a href="programme-2026.csv" download>last year's full file</a>.</span></div>
+    <div class="step"><b>2. Preview it in the app</b><p>Download it as CSV, then open that file in the app on your own computer or phone, with the data check. Nothing is uploaded or published.</p>
       <a class="btn" href="./?preview">Preview a file</a></div>
     <div class="step"><b>3. Print it as a race card</b><p>See the same file laid out like the printed race card, and print it or save it as a PDF.</p>
       <a class="btn" href="racecard.html">Race card</a></div>

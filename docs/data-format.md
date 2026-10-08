@@ -75,6 +75,10 @@ You can check a draft yourself before sending it, on any computer or phone, with
 
 When the file is added to the calendar, it's checked again automatically, and any row that doesn't follow the rules is reported by line number before anything reaches the live app. Adding `?check` to the app's address (`https://bsc-sailing.github.io/calendar/?check`) shows the same check for a published season.
 
-## Starting from the Excel template
+## Starting from a template
 
-[The Excel template](programme-template.xlsx) has the headings, the date and time formats, and drop-down lists for Fleet, Race start order, Tide source and GP weekend already set up, so the saved CSV comes out in the right shape. Fill in the **Programme** sheet (delete the sample rows), then **File → Save As → CSV UTF-8**, naming it `programme-2027.csv`. Excel warns that only the current sheet is saved; that's expected.
+There's a ready-made template for Google Sheets and for Excel. Both have the headings, the date and time formats, and drop-down lists for Fleet, Race start order, Tide source and GP weekend already set up, so the CSV comes out in the right shape. Times are stored as text, so they save exactly as typed (`14:52`, `TBC`).
+
+**Google Sheets:** [make your own copy of the template](https://docs.google.com/spreadsheets/d/1_f96_ONFH_KBwGspTjlORB28uWOV743X_6ce3sHiDSQ/copy) (you'll need to be signed in to a Google account). Fill in the **Programme** tab (delete the sample rows), then, with that tab open, **File → Download → Comma-separated values (.csv)**. Only the tab you're on is downloaded. Google names the file after the sheet and tab ("BSC programme template - Programme.csv"); the name doesn't matter for checking it, and whoever publishes it renames it `programme-2027.csv`. You can also share the sheet itself with a maintainer instead of emailing a CSV.
+
+**Excel:** download [the Excel template](programme-template.xlsx). Fill in the **Programme** sheet (delete the sample rows), then **File → Save As → CSV UTF-8**, naming it `programme-2027.csv`. Excel warns that only the current sheet is saved; that's expected. (The Excel file also opens in Google Sheets: upload it to Google Drive and open it, and it works the same as the Google Sheets template.)

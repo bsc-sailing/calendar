@@ -36,7 +36,7 @@ For bigger changes, download the file (**…** menu → **Download**), edit it i
 
 ## Add a new season
 
-1. Prepare `programme-YEAR.csv` in the format in [data-format.md](data-format.md). Starting from the Excel template (`templates/programme-template.xlsx`), or a copy of last year's file, is easiest. Check it first with the app's preview (`https://bsc-sailing.github.io/calendar/?preview`) and the race card (`…/racecard.html`); both open a file from your own device without uploading it.
+1. Prepare `programme-YEAR.csv` in the format in [data-format.md](data-format.md). Starting from the Google Sheets or Excel template (both linked from the format guide), or a copy of last year's file, is easiest. A CSV downloaded from Google Sheets is named after the sheet, so rename it `programme-YEAR.csv` before uploading. Check it first with the app's preview (`https://bsc-sailing.github.io/calendar/?preview`) and the race card (`…/racecard.html`); both open a file from your own device without uploading it.
 2. On GitHub, open the `data` folder, then **Add file → Upload files**, and drop the file in. Leave the earlier seasons in place.
 3. Choose **Create a new branch for this commit and start a pull request**, and create the PR.
 4. Check the result of **Build and deploy** on the PR, as above. It reports any row that wouldn't show correctly, by line number.
