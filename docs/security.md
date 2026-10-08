@@ -35,6 +35,6 @@ A pull request from someone else's copy of the repo runs the **Build and deploy*
 
 - **`RELEASE_TOKEN`** is a fine-grained token owned by a maintainer: this repo only, **Contents: Read and write**, nothing else. Give it an expiry (a year is fine) and replace it when the scheduled jobs start failing with an authentication error.
 - **Keep the maintainers team small,** and remove people who step back.
-- **Two-factor authentication** on every maintainer's GitHub account; the org can require it under **Settings → Authentication security**.
+- **Two-factor authentication** on every maintainer's GitHub account (each person's own **Settings → Password and authentication**). The org can then require it: the organisation's settings, not the repo's (`github.com/organizations/bsc-sailing/settings/security`), **Require two-factor authentication**. Anyone without it is removed from the org, so check each maintainer has it turned on first.
 - **The Google Sheets template** is shared as view-only; people make their own copy, so nobody can change the original.
 - **`data/tides-official.csv` is public.** See `scripts/tide/TIDES.md` about keeping it private if the club prefers.
