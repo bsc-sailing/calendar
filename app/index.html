@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BSC Sailing Calendar app, version 2.15.3 (2026-10-01) -->
+<!-- BSC Sailing Calendar app. Version and settings: CONFIG near the top of the script. -->
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
@@ -254,6 +254,14 @@ dialog#sail::backdrop { background: #05131c; }
 .check h2 { font-family: var(--display); font-size: 1rem; margin: 0 0 6px; }
 .check ul { margin: 0; padding-left: 18px; }
 .check .bad { color: var(--buoy); font-weight: 700; }
+.preview { margin: 14px 0 6px; padding: 14px; border: 2px solid var(--water); border-radius: 10px; background: var(--surface); }
+.preview h2 { font-family: var(--display); font-size: 1.1rem; margin: 0 0 4px; }
+.preview p { margin: 0 0 10px; }
+.preview .prow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.preview .prow a.pill { text-decoration: none; display: inline-flex; align-items: center; }
+.preview .pstatus { margin: 10px 0 0; font-weight: 700; }
+.preview .pstatus.bad { color: var(--buoy); }
+.preview .check { margin-top: 12px; }
 .version { color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
 .support { color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
 .support summary { cursor: pointer; }
@@ -334,6 +342,7 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
 <div class="wrap">
   <div class="brand"><a href="https://blackwatersailingclub.org.uk/" target="_blank" rel="noopener"><img class="logo" src="logo.png" alt="Blackwater Sailing Club" width="56" height="56" onerror="this.hidden=true"></a><h1 id="title">BSC Sailing Calendar</h1></div>
   <p class="sub" id="sub">Races, events, training and tides for every day of the season.</p>
+  <section class="preview" id="preview" hidden></section>
   <div class="chartlink"><button class="pill navlink" type="button" id="openCourses">Race<br>Courses</button><button class="pill navlink" type="button" id="openChart">Race Marks<br>Map</button><button class="pill navlink" type="button" id="openTides">Tides &amp;<br>Weather</button><button class="pill navlink" type="button" id="openEvents">Club<br>Events</button></div>
 
   <section class="seasonbar" id="seasonbar" hidden>
@@ -449,15 +458,16 @@ dialog#sheet[open] { animation: rise 0.18s ease-out; }
 
 <script>
 /* ------------------------------------------------------------------
-   Settings. Everything else comes from programme.csv, so a new season
-   only needs a new programme.csv (same column headings).
+   Settings. Everything else comes from the data files (data/ in the repo,
+   published alongside this page), so a new season only needs a new
+   programme-YEAR.csv. See docs/updating-data.md.
 ------------------------------------------------------------------ */
 const CONFIG = {
-  version: "2.16.6", released: "2026-10-06",   // bump both here and in sw.js, and add a line to CHANGELOG.md
+  version: "2.17.0", released: "2026-10-08",   // bump both here and in sw.js, and add a line to CHANGELOG.md
   filePattern: "programme-{year}.csv",  // one file per season: programme-2026.csv, programme-2027.csv, ...
   yearsBack: 1, yearsAhead: 2,          // which years to look for around the current year
   legacyFile: "programme.csv",          // an older single file: used for its own year if no dated file covers it
-  extrasPattern: "extras-{year}.csv",   // dates added after the printed programme (see README, "Extra dates"); merged into that season
+  extrasPattern: "extras-{year}.csv",   // dates added after the printed programme (see docs/updating-data.md, "Add an extra date"); merged into that season
   name: "BSC Sailing Calendar",
   venue: "Blackwater Sailing Club, Heybridge Basin, Maldon",   // location on calendar entries
   defaultMinutes: 180,                                         // length of a timed calendar entry when no finish time is given
@@ -467,7 +477,7 @@ const CONFIG = {
   coursesFile: "courses-2026.csv",
   chartImage: "chart-2026.jpg",     // large-print race marks chart
   chartImageDate: "March 2026",
-  eventsFile: "events.json",        // built by .github/workflows/update-events.yml — see README ("Club Events")
+  eventsFile: "events.json",        // built by .github/workflows/update-events.yml — see docs/automation.md
   eventsSource: "https://blackwatersailingclub.org.uk/events",
   tidesFile: "tides.json",           // built by .github/workflows/update-tides.yml — see scripts/tide/TIDES.md
   tidesListDays: 14                 // how many days the "next N days" list shows
@@ -1644,7 +1654,7 @@ function activateSeason(s) {
   seasonFinished = s.last < today;
   $("hidePast").checked = !seasonFinished;
   state.month = "all"; state.chip = "all"; state.preset = null; $("q").value = "";
-  document.title = CONFIG.name + " " + YEAR; $("title").textContent = CONFIG.name;
+  document.title = CONFIG.name + " " + YEAR + (s.preview ? " (preview)" : ""); $("title").textContent = CONFIG.name + (s.preview ? ": preview" : "");
   $("foot").hidden = false;
   buildSeasonBar(); buildPills(); renderNext(); render(); showChecks(); renderSupport();
 }
@@ -1669,28 +1679,33 @@ async function renderSupport() {
 /* Add ?check to the address to see a data check for the season on screen */
 function showChecks() {
   const box = $("check");
-  if (!/[?&]check\b/.test(location.search)) { box.hidden = true; return; }
+  if (!/[?&]check\b/.test(location.search) && !SEASON.preview) { box.hidden = true; return; }
   const recs = SEASON.records, out = [];
   const need = ["Date", "High water", "Tide height (m)", "Start time", "Fleet", "Race start order", "Event", "Training", "GP weekend", "Race / series", "Race no(s)", "Detail"];
   const cols = Object.keys(recs[0] || {}), missing = need.filter(c => !cols.includes(c));
   if (missing.length) out.push([true, "Missing columns: " + missing.join(", ")]);
-  let badDate = 0, badStart = 0, badOrder = 0, noStart = 0, badGp = 0, otherYear = 0;
-  recs.forEach(r => {
-    const d = r["Date"], st = r["Start time"], o = r["Race start order"], g = r["GP weekend"];
-    if (!/^\d{4}-\d\d-\d\d$/.test(d)) { badDate++; return; }
+  // Line numbers in the file (row 1 is the headings), shown for a previewed file so
+  // problems can be found in the spreadsheet. A published season has extra dates
+  // merged in, so its rows no longer match one file's lines.
+  const L = { badDate: [], badStart: [], badOrder: [], noStart: [], badGp: [] };
+  let otherYear = 0;
+  recs.forEach((r, i) => {
+    const d = r["Date"], st = r["Start time"], o = r["Race start order"], g = r["GP weekend"], line = i + 2;
+    if (!/^\d{4}-\d\d-\d\d$/.test(d)) { L.badDate.push(line); return; }
     if (Number(d.slice(0, 4)) !== SEASON.year) otherYear++;
-    if (st && !/^(\d\d:\d\d|TBC)$/.test(st)) badStart++;
-    if (o && !/^[1-9]$/.test(o)) badOrder++;
-    if (o && !/^\d\d:\d\d$/.test(st)) noStart++;
-    if (g && !/^(TRUE|FALSE)$/i.test(g)) badGp++;
+    if (st && !/^(\d\d:\d\d|TBC)$/.test(st)) L.badStart.push(line);
+    if (o && !/^[1-9]$/.test(o)) L.badOrder.push(line);
+    if (o && !/^\d\d:\d\d$/.test(st)) L.noStart.push(line);
+    if (g && !/^(TRUE|FALSE)$/i.test(g)) L.badGp.push(line);
   });
+  const where = a => SEASON.preview ? " (line" + (a.length > 1 ? "s " : " ") + a.slice(0, 6).join(", ") + (a.length > 6 ? " and more" : "") + ")" : "";
   const noTide = DAYS.filter(d => !d.hw || isNaN(d.ht)).length;
   const clash = DAYS.filter(d => new Set(d.rows.map(r => r.hw)).size > 1 || new Set(d.rows.map(r => r.ht)).size > 1).length;
-  [[badDate, "rows with a Date that isn't YYYY-MM-DD (ignored)"], [badStart, "Start time values that aren't HH:MM or TBC"], [badOrder, "Race start order values that aren't 1-9"],
-   [noStart, "racing rows (with a start order) that have no HH:MM start time"], [badGp, "GP weekend values that aren't TRUE or FALSE"],
-   [noTide, "days with no high water time or tide height"], [clash, "days where rows disagree on the high water time or height"]].forEach(([n, t]) => { if (n) out.push([true, n + " " + t]); });
+  [[L.badDate, "rows with a Date that isn't YYYY-MM-DD (ignored)"], [L.badStart, "Start time values that aren't HH:MM or TBC"], [L.badOrder, "Race start order values that aren't 1-9"],
+   [L.noStart, "racing rows (with a start order) that have no HH:MM start time"], [L.badGp, "GP weekend values that aren't TRUE or FALSE"]].forEach(([a, t]) => { if (a.length) out.push([true, a.length + " " + t + where(a)]); });
+  [[noTide, "days with no high water time or tide height"], [clash, "days where rows disagree on the high water time or height"]].forEach(([n, t]) => { if (n) out.push([true, n + " " + t]); });
   if (otherYear) out.push([false, otherYear + " rows have dates outside " + SEASON.year + " (fine for coaching or events, but check they're intended)"]);
-  const t = el("h2", "", "Data check: " + SEASON.year);
+  const t = el("h2", "", "Data check: " + SEASON.year + (SEASON.preview ? " (" + SEASON.preview + ")" : ""));
   const ul = el("ul", "");
   ul.appendChild(el("li", "", recs.length + " rows, " + DAYS.length + " days, " + fmtShort.format(SEASON.first) + " to " + fmtShort.format(SEASON.last) + " " + SEASON.last.getFullYear()));
   ul.appendChild(el("li", "", "Fleets: " + (FLEETS.join(", ") || "none")));
@@ -1721,14 +1736,62 @@ async function start() {
     if (dates.length && parseISO(dates[dates.length - 1]) > s.last) s.last = parseISO(dates[dates.length - 1]);
     if (dates.length && parseISO(dates[0]) < s.first) s.first = parseISO(dates[0]);
   }));
+  const previewing = /[?&]preview\b/.test(location.search);
+  if (previewing) initPreview();
   if (!SEASONS.length) {
     const box = $("list"); box.textContent = "";
     const p = el("div", "empty", "The programme couldn't be loaded. Check your connection and try again.");
     p.appendChild(document.createElement("br")); const b = pillBtn("Try again", () => location.reload()); b.style.marginTop = "10px"; p.appendChild(b); box.appendChild(p);
     return;
   }
+  if (previewing && SEASON && SEASON.preview) { loadWeather(); return; }
   activateSeason(pickSeason());
   loadWeather();
+}
+
+/* ---------- preview a programme file (?preview) ----------
+   For whoever prepares a season: open a programme CSV from this device and see
+   it in the app exactly as it would look once published, with the data check.
+   Nothing is uploaded; it lasts until the tab is closed or "Stop previewing". */
+function initPreview() {
+  const box = $("preview"); box.textContent = ""; box.hidden = false;
+  box.appendChild(el("h2", "", "Preview a programme file"));
+  box.appendChild(el("p", "", "Choose a programme CSV saved on this device. The app shows it as that season, with a data check below, exactly as it would look once published. Nothing is uploaded or published."));
+  const row = el("div", "prow");
+  const pick = el("label", "pill", "Choose a CSV file…");
+  const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".csv,text/csv"; inp.hidden = true; pick.appendChild(inp);
+  const card = el("a", "pill", "See it as a race card"); card.href = "racecard.html?preview"; card.hidden = true;
+  const stop = pillBtn("Stop previewing", () => { try { sessionStorage.removeItem("bsc-preview"); } catch (e) {} location.href = "./"; });
+  const guide = el("a", "pill", "Format guide"); guide.href = "guide.html";
+  row.append(pick, card, stop, guide);
+  const status = el("p", "pstatus"); status.setAttribute("role", "status");
+  box.append(row, status, $("check"));
+  inp.addEventListener("change", () => {
+    const f = inp.files[0]; if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => loadPreview(String(rd.result), f.name, status, card);
+    rd.readAsText(f); inp.value = "";
+  });
+  let saved = null; try { saved = JSON.parse(sessionStorage.getItem("bsc-preview") || "null"); } catch (e) {}
+  if (saved && saved.text) loadPreview(saved.text, saved.name, status, card);
+}
+function loadPreview(text, name, status, card) {
+  let records = [];
+  try { if (text.trim()) records = parseCSV(text); } catch (e) {}
+  const dates = records.map(r => r["Date"]).filter(d => /^\d{4}-\d\d-\d\d$/.test(d || "")).sort();
+  if (!dates.length) {
+    status.className = "pstatus bad";
+    status.textContent = name + " has no rows with a Date in YYYY-MM-DD format, so there's nothing to show. Check its first row has the column headings from the format guide, and that it was saved as CSV.";
+    return;
+  }
+  const year = Number(dates[0].slice(0, 4));
+  const s = { year, records, first: parseISO(dates[0]), last: parseISO(dates[dates.length - 1]), modified: "", nExtra: 0, preview: name };
+  SEASONS = SEASONS.filter(x => x.year !== year).concat(s).sort((a, b) => a.year - b.year);
+  try { sessionStorage.setItem("bsc-preview", JSON.stringify({ text, name })); } catch (e) {}
+  activateSeason(s);
+  status.className = "pstatus";
+  status.textContent = "Showing " + name + " as the " + year + " season: " + records.length + " rows, " + DAYS.length + " days. Only on this device.";
+  card.hidden = false;
 }
 start();
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {

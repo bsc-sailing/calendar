@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Programme Format Guide</title>
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>
+:root {
+  --bg: #E9EFF2; --surface: #F7FAFB; --ink: #0E2231; --muted: #4D6577; --line: #C3D2DA;
+  --water: #1B6486; --water-soft: #D6E8F0; --head: #0E2231;
+  --body: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0B1A24; --surface: #12283A; --ink: #E6EEF2; --muted: #97ADBB; --line: #26424F; --water: #72B9D6; --water-soft: #173447; --head: #06121A; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5; }
+header { background: var(--head); color: #fff; padding: 22px 16px 20px; }
+header .in, main { max-width: 900px; margin: 0 auto; }
+header h1 { margin: 0 0 4px; font-size: clamp(1.5rem, 5vw, 2rem); line-height: 1.15; }
+header p { margin: 0; color: #CFE6F2; }
+header a { color: #fff; }
+main { padding: 18px 16px 48px; }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 0 0 26px; }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 6px; }
+.step b { font-size: 1rem; }
+.step p { margin: 0; color: var(--muted); font-size: 0.92rem; flex: 1; }
+.step a.btn { align-self: flex-start; margin-top: 4px; background: var(--water); color: #fff; text-decoration: none; border-radius: 8px; padding: 7px 12px; font-weight: 700; font-size: 0.92rem; }
+@media (prefers-color-scheme: dark) { .step a.btn { color: #0B1A24; } }
+.step .more { font-size: 0.85rem; }
+.step .more a { color: var(--water); }
+#doc h1 { font-size: 1.5rem; margin: 8px 0 6px; }
+#doc h2 { font-size: 1.2rem; margin: 26px 0 6px; padding-top: 10px; border-top: 1px solid var(--line); }
+#doc a { color: var(--water); }
+#doc code { background: var(--water-soft); border-radius: 4px; padding: 0 4px; font-size: 0.92em; }
+.tbl { overflow-x: auto; margin: 8px 0 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+#doc table { border-collapse: collapse; font-size: 0.86rem; min-width: 100%; }
+#doc th, #doc td { border-bottom: 1px solid var(--line); padding: 5px 8px; text-align: left; vertical-align: top; }
+#doc th { background: var(--water-soft); white-space: nowrap; }
+#doc tr:last-child td { border-bottom: 0; }
+#doc li { margin: 4px 0; }
+.err { color: #BF3A1E; }
+</style>
+</head>
+<body>
+<header><div class="in">
+  <h1>Preparing the season programme</h1>
+  <p>For whoever puts together the club's programme each year: the file the <a href="./">BSC Sailing Calendar</a> reads, and how to check a draft before it's published.</p>
+</div></header>
+<main>
+  <div class="steps">
+    <div class="step"><b>1. Start from the template</b><p>Column headings, formats and drop-down lists already set up, with sample rows to copy.</p>
+      <a class="btn" href="programme-template.xlsx" download>Excel template</a>
+      <span class="more">Or the <a href="programme-template.csv" download>CSV template</a>, or <a href="programme-2026.csv" download>last year's full file</a>.</span></div>
+    <div class="step"><b>2. Preview it in the app</b><p>Open your saved CSV in the app on your own computer or phone, with the data check. Nothing is uploaded or published.</p>
+      <a class="btn" href="./?preview">Preview a file</a></div>
+    <div class="step"><b>3. Print it as a race card</b><p>See the same file laid out like the printed race card, and print it or save it as a PDF.</p>
+      <a class="btn" href="racecard.html">Race card</a></div>
+    <div class="step"><b>4. Send it in</b><p>When it's ready, email the CSV to a calendar maintainer, who publishes it. It's checked again automatically before it goes live.</p></div>
+  </div>
+  <article id="doc"><p>Loading the format guide…</p></article>
+</main>
+<script>
+/* Renders docs/data-format.md (published as data-format.md), so this page and
+   the repo's copy can never disagree. Handles only what that file uses:
+   headings, paragraphs, bullet lists, tables, **bold**, `code` and [links](url). */
+function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+function inline(s) {
+  return esc(s)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
+    .replace(/\*([^*]+)\*/g, "<i>$1</i>")
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, t, u) => /^(https?:|[\w.-]+$|\.\/|#)/.test(u) ? '<a href="' + u + '">' + t + "</a>" : t);
+}
+function md(text) {
+  const out = [], lines = text.replace(/\r/g, "").split("\n");
+  let i = 0;
+  const cells = l => l.trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim());
+  while (i < lines.length) {
+    const l = lines[i];
+    if (!l.trim()) { i++; continue; }
+    let m;
+    if ((m = l.match(/^(#{1,3}) (.*)/))) { out.push("<h" + m[1].length + ">" + inline(m[2]) + "</h" + m[1].length + ">"); i++; continue; }
+    if (/^\s*\|/.test(l)) {
+      const rows = []; while (i < lines.length && /^\s*\|/.test(lines[i])) rows.push(lines[i++]);
+      const head = cells(rows[0]), body = rows.slice(2).map(cells);
+      out.push('<div class="tbl"><table><thead><tr>' + head.map(h => "<th>" + inline(h) + "</th>").join("") + "</tr></thead><tbody>" +
+        body.map(r => "<tr>" + r.map(c => "<td>" + inline(c) + "</td>").join("") + "</tr>").join("") + "</tbody></table></div>");
+      continue;
+    }
+    if (/^- /.test(l)) {
+      const items = []; while (i < lines.length && /^- /.test(lines[i])) items.push(lines[i++].slice(2));
+      out.push("<ul>" + items.map(t => "<li>" + inline(t) + "</li>").join("") + "</ul>"); continue;
+    }
+    const para = []; while (i < lines.length && lines[i].trim() && !/^(#|- |\s*\|)/.test(lines[i])) para.push(lines[i++]);
+    out.push("<p>" + inline(para.join(" ")) + "</p>");
+  }
+  return out.join("\n");
+}
+fetch("data-format.md", { cache: "no-cache" })
+  .then(r => { if (!r.ok) throw new Error(); return r.text(); })
+  .then(t => { document.getElementById("doc").innerHTML = md(t); })
+  .catch(() => { document.getElementById("doc").innerHTML = '<p class="err">The format guide couldn\'t be loaded. Check your connection and reload.</p>'; });
+</script>
+</body>
+</html>

@@ -36,7 +36,7 @@ For bigger changes, download the file (**…** menu → **Download**), edit it i
 
 ## Add a new season
 
-1. Prepare `programme-YEAR.csv` in the format in [data-format.md](data-format.md). Starting from `templates/programme-template.csv`, or a copy of last year's file, is easiest.
+1. Prepare `programme-YEAR.csv` in the format in [data-format.md](data-format.md). Starting from the Excel template (`templates/programme-template.xlsx`), or a copy of last year's file, is easiest. Check it first with the app's preview (`https://bsc-sailing.github.io/calendar/?preview`) and the race card (`…/racecard.html`); both open a file from your own device without uploading it.
 2. On GitHub, open the `data` folder, then **Add file → Upload files**, and drop the file in. Leave the earlier seasons in place.
 3. Choose **Create a new branch for this commit and start a pull request**, and create the PR.
 4. Check the result of **Build and deploy** on the PR, as above. It reports any row that wouldn't show correctly, by line number.
@@ -44,7 +44,7 @@ For bigger changes, download the file (**…** menu → **Download**), edit it i
 
 **Tides the programme doesn't print** (coaching days, Friday courses) can be left blank: the app fills them with an estimate marked `≈`, and that estimate improves automatically. To write the estimates into the file instead, see `scripts/tide/TIDES.md`, "Two ways to use this".
 
-If someone without a GitHub account prepares the file (the sailing secretary, say), they email it to a maintainer, who uploads it as above.
+If someone without a GitHub account prepares the file (the sailing secretary, say), point them at the format guide on the live site (`https://bsc-sailing.github.io/calendar/guide.html`): it has the template, the format, and the preview and race-card tools, so they can check it themselves. They then email it to a maintainer, who uploads it as above.
 
 ## Add an extra date
 

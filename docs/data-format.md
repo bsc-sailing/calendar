@@ -8,7 +8,7 @@ Downloads: [blank template with sample rows](programme-template.csv) · [the ful
 
 ## The big difference from the race card
 
-The printed race card has **one row per day**, with a column for each fleet. The app's file has **one row per day per fleet** (or per event, or per training session). So a race-card day with five fleets racing, a cruiser weekend and cadet training becomes seven rows, all with the same date and tide.
+The printed race card has **one row per day**, with a column for each fleet. The app's file has **one row per day per fleet** (or per event, or per training session). So a race-card day with five fleets racing, a cruiser weekend, cadet training and an open meeting becomes eight rows, all with the same date and tide.
 
 Here's Sunday 19 April 2026 from the race card:
 
@@ -68,4 +68,13 @@ Keep these headings exactly as written, in the first row. Their order doesn't ma
 
 ## Checking a file
 
-When the file is added, it's checked automatically, and any row that doesn't follow the rules above is reported by line number before anything reaches the live app. You can also open the app with `?check` on the end of the address (`https://bsc-sailing.github.io/calendar/?check`) to see the same check for a published season.
+You can check a draft yourself before sending it, on any computer or phone, without anything being uploaded or published:
+
+- **[Preview it in the app](./?preview):** choose your saved CSV, and the app shows that season exactly as it would appear once published, with a data check at the top listing anything that doesn't follow the rules above.
+- **[See it as a race card](racecard.html):** open the same file to see it laid out like the printed race card, to compare against your own version. It prints on A4 landscape, or saves as a PDF from the print dialog.
+
+When the file is added to the calendar, it's checked again automatically, and any row that doesn't follow the rules is reported by line number before anything reaches the live app. Adding `?check` to the app's address (`https://bsc-sailing.github.io/calendar/?check`) shows the same check for a published season.
+
+## Starting from the Excel template
+
+[The Excel template](programme-template.xlsx) has the headings, the date and time formats, and drop-down lists for Fleet, Race start order, Tide source and GP weekend already set up, so the saved CSV comes out in the right shape. Fill in the **Programme** sheet (delete the sample rows), then **File → Save As → CSV UTF-8**, naming it `programme-2027.csv`. Excel warns that only the current sheet is saved; that's expected.
