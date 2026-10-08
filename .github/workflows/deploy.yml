@@ -1,0 +1,87 @@
+# Builds the website from the repo and publishes it to GitHub Pages.
+#
+# - Every push to main (a merged pull request, a direct push, or one of the
+#   scheduled data jobs) checks the data, builds the site and publishes it.
+# - Every pull request runs the same checks and build, but publishes nothing,
+#   so a broken file shows as a red cross on the PR before it's merged.
+# - After publishing, it tags the release (v2.17.0 and so on) if that version
+#   hasn't been tagged yet.
+#
+# Needs Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
+# See README, "How changes reach the live site".
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  # One deploy at a time, never cancelled half-way; PR checks run independently.
+  group: ${{ github.event_name == 'pull_request' && format('check-{0}', github.ref) || 'pages' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check the season data
+        run: python3 scripts/check-data.py
+
+      - name: Build the site
+        run: python3 scripts/build-site.py --out _site
+
+      - name: Upload the site
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  tag:
+    if: github.event_name != 'pull_request'
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Tag the release if it's a new version
+        run: |
+          index=app/index.html; [ -f "$index" ] || index=index.html
+          v="$(grep -o 'version: "[0-9][0-9.]*"' "$index" | head -n1 | grep -o '[0-9][0-9.]*')"
+          if [ -z "$v" ]; then echo "No version found in $index."; exit 0; fi
+          if git rev-parse -q --verify "refs/tags/v$v" >/dev/null; then
+            echo "v$v is already tagged."
+          else
+            git tag "v$v" "$GITHUB_SHA"
+            git push origin "v$v"
+            echo "Tagged v$v." >> "$GITHUB_STEP_SUMMARY"
+          fi
