@@ -8,7 +8,7 @@
 #   hasn't been tagged yet.
 #
 # Needs Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
-# See README, "How changes reach the live site".
+# See docs/releasing.md.
 name: Build and deploy
 
 on:

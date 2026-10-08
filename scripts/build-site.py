@@ -28,26 +28,15 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Only the files directly inside each folder are copied (not subfolders).
 PUBLISH_DIRS = ["app", "app/assets", "data", "templates"]
 
-# Before the repo was split into folders, everything lived at the top level.
-# Used only when app/index.html doesn't exist yet.
-LEGACY_SKIP = {"README.md", "CHANGELOG.md"}
-
-
 def sources():
     """(published name, source path) for every file to publish."""
-    if os.path.isfile(os.path.join(ROOT, "app", "index.html")):
-        for d in PUBLISH_DIRS:
-            folder = os.path.join(ROOT, d)
-            if not os.path.isdir(folder):
-                continue
-            for name in sorted(os.listdir(folder)):
-                path = os.path.join(folder, name)
-                if os.path.isfile(path) and not name.startswith("."):
-                    yield name, path
-    else:
-        for name in sorted(os.listdir(ROOT)):
-            path = os.path.join(ROOT, name)
-            if os.path.isfile(path) and not name.startswith(".") and name not in LEGACY_SKIP:
+    for d in PUBLISH_DIRS:
+        folder = os.path.join(ROOT, d)
+        if not os.path.isdir(folder):
+            continue
+        for name in sorted(os.listdir(folder)):
+            path = os.path.join(folder, name)
+            if os.path.isfile(path) and not name.startswith("."):
                 yield name, path
 
 

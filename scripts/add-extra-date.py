@@ -69,9 +69,9 @@ def parse_start(s):
     return None
 
 
-def tide_for(repo_root, iso):
+def tide_for(data_dir, iso):
     try:
-        for t in json.load(open(os.path.join(repo_root, "tides.json"))).get("tides", []):
+        for t in json.load(open(os.path.join(data_dir, "tides.json"))).get("tides", []):
             if t["date"] == iso:
                 return t["time"], str(t["height"]), "Programme" if t.get("source") == "Programme" else "Estimated"
     except (OSError, ValueError, KeyError):
@@ -91,7 +91,7 @@ def set_output(**kw):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--event", required=True)
-    ap.add_argument("--repo-root", default=".")
+    ap.add_argument("--data-dir", default="data", help="folder holding extras-YEAR.csv and tides.json")
     ap.add_argument("--today", help="for testing")
     args = ap.parse_args()
 
@@ -136,7 +136,7 @@ def main():
         detail += " Not part of any series."
     if notes:
         detail += " " + notes
-    hw, ht, src = tide_for(args.repo_root, iso)
+    hw, ht, src = tide_for(args.data_dir, iso)
     row = {c: "" for c in COLUMNS}
     row.update({"Date": iso, "High water": hw, "Tide height (m)": ht, "Tide source": src, "Start time": start,
                 "GP weekend": "FALSE", "Detail": detail, "Request": f"#{num}"})
@@ -147,14 +147,14 @@ def main():
     else:
         row["Training"] = name
 
-    path = os.path.join(args.repo_root, f"extras-{d.year}.csv")
+    path = os.path.join(args.data_dir, f"extras-{d.year}.csv")
     rows = []
     if os.path.exists(path):
         rows = [r for r in csv.DictReader(open(path, encoding="utf-8-sig")) if r.get("Request") != f"#{num}"]
     # this issue's row may have moved year after an edit: remove it from the other files too
-    for other in os.listdir(args.repo_root):
-        if re.fullmatch(r"extras-\d{4}\.csv", other) and os.path.join(args.repo_root, other) != path:
-            op = os.path.join(args.repo_root, other)
+    for other in os.listdir(args.data_dir):
+        if re.fullmatch(r"extras-\d{4}\.csv", other) and os.path.join(args.data_dir, other) != path:
+            op = os.path.join(args.data_dir, other)
             before = list(csv.DictReader(open(op, encoding="utf-8-sig")))
             keep = [r for r in before if r.get("Request") != f"#{num}"]
             if len(keep) == len(before):
@@ -175,7 +175,7 @@ def main():
         f"| Start | {start} |\n| Detail | {detail} |\n| High water | {tide_txt} |\n\n"
         f"Closes #{num}\n")
     open("add-extra-date-title.txt", "w").write(f"Extra date: {iso} {name}")
-    set_output(ok="true", file=os.path.relpath(path, args.repo_root))
+    set_output(ok="true", file=os.path.relpath(path, args.data_dir))
 
 
 if __name__ == "__main__":

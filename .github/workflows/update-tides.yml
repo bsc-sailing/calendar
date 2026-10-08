@@ -1,12 +1,12 @@
 name: Update tide reference
 
-# Refits the harmonic tide model against every programme-*.csv in the repo
+# Refits the harmonic tide model against every data/programme-*.csv
 # (pooling all seasons present, not just the latest), and regenerates
-# tides.json: an estimated high water for every day in a rolling 24-month
+# data/tides.json: an estimated high water for every day in a rolling 24-month
 # window from today. This is what lets the app show a sensible "≈" tide
 # for any date, not just the specific extra dates a season's own file
 # happens to include. See scripts/tide/TIDES.md for the method and its
-# accuracy, and README.md ("Club Events") for why this pushes straight to
+# accuracy, and docs/automation.md for why this pushes straight to
 # main using RELEASE_TOKEN rather than the default Actions identity — the
 # same reasoning and the same secret apply here.
 #
@@ -19,6 +19,10 @@ on:
   schedule:
     - cron: "43 6 * * 0"   # Sunday mornings; an odd time so it's not stuck at the top of everyone's cron
   workflow_dispatch: {}
+
+concurrency:
+  group: tides-json         # never two jobs writing tides.json at once (shared with check-official-tides.yml)
+  cancel-in-progress: false
 
 jobs:
   update-tides:
@@ -33,7 +37,7 @@ jobs:
 
       - name: Regenerate the rolling tide reference
         working-directory: scripts/tide
-        run: python3 generate-tide-reference.py --repo-root ../.. --months-ahead 24 --out ../../tides.json
+        run: python3 generate-tide-reference.py --data-dir ../../data --months-ahead 24 --out ../../data/tides.json
 
       - name: Check whether the actual tide data changed (ignoring the timestamp)
         id: check
@@ -46,9 +50,9 @@ jobs:
           # anything — there's nothing yet on the very first run).
           python3 - <<'PYEOF_INNER'
           import json, os, subprocess
-          new = json.load(open("tides.json")); new.pop("generated", None)
+          new = json.load(open("data/tides.json")); new.pop("generated", None)
           try:
-              old_raw = subprocess.run(["git", "show", "HEAD:tides.json"], capture_output=True, text=True, check=True).stdout
+              old_raw = subprocess.run(["git", "show", "HEAD:data/tides.json"], capture_output=True, text=True, check=True).stdout
               old = json.loads(old_raw); old.pop("generated", None)
           except Exception:
               old = None
@@ -63,6 +67,6 @@ jobs:
         run: |
           git config user.name "jfairhead"
           git config user.email "17782781+jfairhead@users.noreply.github.com"
-          git add tides.json
+          git add data/tides.json
           git commit -m "Update tide reference (automated)"
           git push
