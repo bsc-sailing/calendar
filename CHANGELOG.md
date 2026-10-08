@@ -2,6 +2,9 @@
 
 Version numbers are in `CONFIG.version` in `app/index.html` and `VERSION` in `app/sw.js`. Keep the two the same, and add a line here for every release. The version is shown at the bottom of the app, with more detail under **Support info**. Changes merged before the next version number is chosen are listed under **Unreleased**.
 
+## Unreleased
+- Race card: each clock change is a full-width line just before the first day after it ("Clocks go forward an hour at 1 am on Sunday 29 March. Times below are BST."), instead of a tag squeezed into the date column.
+
 ## 2.18.0 – 8 Oct 2026
 - **Race card from the app:** a "Race card (print or PDF)" button next to "Add to calendar" at the bottom of the list opens the season as a printable race card (extra dates included).
 - **Clock changes:** the day list marks the day the clocks go forward or back (and the day before), and the day's details and Tides & Weather say so, since high water and sunset jump an hour by the clock. The race card marks them too.
