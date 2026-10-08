@@ -39,7 +39,7 @@ td.day { white-space: nowrap; }
 tr.month td { background: var(--month); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.8rem; padding: 3px 6px; }
 tr.gp td { background: var(--gold-soft); }
 tr.nr td.start { font-weight: 700; }
-.clk-tag { display: inline-block; margin-left: 4px; padding: 0 3px; border-radius: 3px; border: 1px solid var(--water); color: var(--water); font-size: 0.66rem; font-weight: 700; vertical-align: 1px; white-space: nowrap; }
+tr.clock td { background: var(--surface); color: var(--water); font-weight: 700; font-size: 0.76rem; padding: 2px 6px; border-top: 2px solid var(--water); }
 .gp-tag { display: inline-block; margin-left: 4px; padding: 0 3px; border-radius: 3px; background: var(--gold); color: #fff; font-size: 0.68rem; font-weight: 700; vertical-align: 1px; }
 .est { color: var(--muted); }
 td.all { text-align: center; font-weight: 600; }
@@ -104,15 +104,9 @@ function parseCSV(text) {
 const isTime = s => /^\d\d:\d\d$/.test(s || "");
 const uniq = a => [...new Set(a.filter(Boolean))];
 function lastSunday(y, m) { const d = new Date(y, m + 1, 0, 12); d.setDate(d.getDate() - d.getDay()); return d; }
-// A UK clock change between the previous row's date (exclusive) and this one (inclusive), or tonight's.
-function clockTag(d, prev) {
-  for (const [c, dir] of [[lastSunday(d.getFullYear(), 2), "forward"], [lastSunday(d.getFullYear(), 9), "back"]]) {
-    const diff = Math.round((c - d) / 86400000);
-    if (diff === 1) return "Clocks " + dir + " tonight";
-    const from = prev || new Date(d.getTime() - 7 * 86400000);
-    if (c > from && c <= d) return diff === 0 ? "Clocks " + dir : "Clocks went " + dir + " " + c.getDate() + " " + MONTHS[c.getMonth()].slice(0, 3);
-  }
-  return "";
+// UK clock changes in a year: last Sunday of March (forward, 1 am, to BST) and of October (back, 2 am, to GMT).
+function clockChanges(y) {
+  return [{ d: lastSunday(y, 2), text: "forward an hour at 1 am", zone: "BST" }, { d: lastSunday(y, 9), text: "back an hour at 2 am", zone: "GMT" }];
 }
 
 /* One table row per date; one column per start order, plus one for everything without a fleet. */
@@ -184,17 +178,24 @@ function render(records, label, year) {
   r2.appendChild(el("th", "", "BJRC & cruiser races, training, events"));
   thead.append(r1, r2); table.appendChild(thead);
 
-  const tb = el("tbody"); let month = -1, prevD = null;
+  const tb = el("tbody"); let month = -1;
+  // Each clock change gets its own full-width row, just before the first listed day on or after it.
+  const pending = [...new Set(days.map(d => d.d.getFullYear()))].flatMap(clockChanges);
   days.forEach(day => {
     if (day.d.getMonth() !== month) {
       month = day.d.getMonth();
       const mr = el("tr", "month"); const mc = el("td", "", MONTHS[month] + (day.iso.slice(0, 4) !== yr ? " " + day.iso.slice(0, 4) : "")); mc.colSpan = ncols + 5; mr.appendChild(mc); tb.appendChild(mr);
     }
+    for (let i = pending.length - 1; i >= 0; i--) {
+      const c = pending[i];
+      if (c.d <= day.d && day.d - c.d < 60 * 86400000) {
+        const cr = el("tr", "clock"), cc = el("td", "", "Clocks go " + c.text + " on Sunday " + c.d.getDate() + " " + MONTHS[c.d.getMonth()] + ". Times below are " + c.zone + ".");
+        cc.colSpan = ncols + 5; cr.appendChild(cc); tb.appendChild(cr); pending.splice(i, 1);
+      } else if (c.d <= day.d) pending.splice(i, 1);
+    }
     const tr = el("tr", (day.gp ? "gp " : "") + (day.nr ? "nr" : ""));
     const dc = el("td", "day", WD[day.d.getDay()] + " " + day.d.getDate());
     if (day.gp) dc.appendChild(el("span", "gp-tag", "GP"));
-    const clk = clockTag(day.d, prevD); prevD = day.d;
-    if (clk) dc.appendChild(el("span", "clk-tag", clk));
     tr.appendChild(dc);
     tr.appendChild(el("td", "num" + (day.est ? " est" : ""), (day.est && day.hw ? "≈" : "") + day.hw));
     const h = parseFloat(day.ht);
