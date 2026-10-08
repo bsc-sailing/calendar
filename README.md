@@ -48,6 +48,12 @@ Changes go through a pull request, reviewed against `.github/CODEOWNERS`. To set
 
 Worth knowing: GitHub never lets anyone approve their own pull request, code owner or not. So if the code owner is also the one opening PRs (the usual case here), that's exactly why step 3 matters — without it, the code owner would be the only person allowed to approve, yet unable to approve their own work, and stuck. Anyone who isn't a bypass-eligible Admin has no such workaround: their PRs always need the code owner's approval.
 
+## How changes reach the live site
+
+`.github/workflows/deploy.yml` builds and publishes the site whenever something lands on `main`: a merged pull request, a direct push, or one of the scheduled data jobs. It checks the season data (`scripts/check-data.py`), assembles the site (`scripts/build-site.py`) and publishes it, usually within a minute or two. Every pull request runs the same checks without publishing, so a broken data file shows as a red cross on the PR rather than on the live site. After publishing a new app version, it tags it (`v2.17.0` and so on).
+
+**One-off setup:** **Settings → Pages → Build and deployment → Source: GitHub Actions** (instead of "Deploy from a branch"). Until that's switched, the workflow's publish step fails and the site keeps being served from the branch as before.
+
 ## Chart, course cards and GO SAIL
 
 Tap **Race Courses** or **Race Marks Map** near the top of the app — each opens its own screen.
