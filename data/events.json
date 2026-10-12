@@ -1,15 +1,7 @@
 {
-  "generated": "2026-10-07T13:34:32Z",
+  "generated": "2026-10-12T15:40:23Z",
   "source": "https://blackwatersailingclub.org.uk/events",
   "events": [
-    {
-      "title": "Grand Prix final weekend",
-      "date": "2026-10-10",
-      "time": "00:00",
-      "hasTime": false,
-      "excerpt": "BSC Grand Prix Final Weekend Dyer Cup and GP Final You do not need to register for these events - this page is for information only. Saturday 10th October Dyer cup: One race start 12.15. General handicap and short…",
-      "link": "https://blackwatersailingclub.org.uk/event-6853779"
-    },
     {
       "title": "Cadet and Junior End-of-Seasons Race Series",
       "date": "2026-10-24",
@@ -97,6 +89,14 @@
       "hasTime": false,
       "excerpt": "The clubhouse is booked to host the Heybridge Gig Race event",
       "link": "https://blackwatersailingclub.org.uk/event-6849969"
+    },
+    {
+      "title": "BJRC Dinner",
+      "date": "2027-02-27",
+      "time": "19:00",
+      "hasTime": true,
+      "excerpt": "BJRC Annual Trophy Dinner BJRC members and guests only For info email bjrcnews2025@gmail.com",
+      "link": "https://blackwatersailingclub.org.uk/event-6849965"
     }
   ]
 }
