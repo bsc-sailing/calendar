@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-12T15:40:23Z",
+  "generated": "2026-10-13T14:21:17Z",
   "source": "https://blackwatersailingclub.org.uk/events",
   "events": [
     {
@@ -9,6 +9,14 @@
       "hasTime": true,
       "excerpt": "Cadet and Junior End-of-Seasons Race Series 24th - 26th October 2026 The briefing will be on the lower deck at the following times: Date High Water Briefing 24th October (Sat) 11:56 09:00 25th October (Sun) 11:39 09:00*…",
       "link": "https://blackwatersailingclub.org.uk/event-6488906"
+    },
+    {
+      "title": "Work Party",
+      "date": "2026-11-01",
+      "time": "09:00",
+      "hasTime": true,
+      "excerpt": "Work Party 9 am to 1 pm Lunch provided Please come and help. Jobs to be done: Digging out and straightening the rill and replacing the tyres Tidying up the lake area Moving unnamed tenders Deep clean the upper galley",
+      "link": "https://blackwatersailingclub.org.uk/event-6868843"
     },
     {
       "title": "Tuesday Evening Talk",
@@ -89,14 +97,6 @@
       "hasTime": false,
       "excerpt": "The clubhouse is booked to host the Heybridge Gig Race event",
       "link": "https://blackwatersailingclub.org.uk/event-6849969"
-    },
-    {
-      "title": "BJRC Dinner",
-      "date": "2027-02-27",
-      "time": "19:00",
-      "hasTime": true,
-      "excerpt": "BJRC Annual Trophy Dinner BJRC members and guests only For info email bjrcnews2025@gmail.com",
-      "link": "https://blackwatersailingclub.org.uk/event-6849965"
     }
   ]
 }
