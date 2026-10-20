@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-13T14:21:17Z",
+  "generated": "2026-10-20T11:48:16Z",
   "source": "https://blackwatersailingclub.org.uk/events",
   "events": [
     {
@@ -15,7 +15,7 @@
       "date": "2026-11-01",
       "time": "09:00",
       "hasTime": true,
-      "excerpt": "Work Party 9 am to 1 pm Lunch provided Please come and help. Jobs to be done: Digging out and straightening the rill and replacing the tyres Tidying up the lake area Moving unnamed tenders Deep clean the upper galley",
+      "excerpt": "Work Party 9 am to 1 pm Lunch provided Please come and help. For rill work be prepared to get muddy! For gardening jobs please bring your own tools Jobs to be done: Digging out and straightening the rill and replacing…",
       "link": "https://blackwatersailingclub.org.uk/event-6868843"
     },
     {
@@ -41,6 +41,14 @@
       "hasTime": true,
       "excerpt": "2026 Cadet Laying Up Supper and Disco Saturday 14th November 2026@ 18:00 Bar opens 6pm, Food from 7pm, Disco from 8:00pm to 9:00pm (primary school age), 9:00pm to 10pm (secondary school age) Come and celebrate the end…",
       "link": "https://blackwatersailingclub.org.uk/event-6837737"
+    },
+    {
+      "title": "RYA First Aid course",
+      "date": "2026-11-21",
+      "time": "09:00",
+      "hasTime": true,
+      "excerpt": "This 1 day RYA First Aid Course for members provides the essential skills needed to confidently deliver first aid in a boating environment. The course explores a range of first aid situations and is ideal for anyone who…",
+      "link": "https://blackwatersailingclub.org.uk/event-6884534"
     },
     {
       "title": "Lake exclusive use by Chelmsford Radio YC",
@@ -89,14 +97,6 @@
       "hasTime": true,
       "excerpt": "Tuesday Evening talk for February. Virtual Cruise up the Blackwater from sea to Beeleigh Falls by John Rogers The Osea room bar opens at 18:30 and the talk starts in the main upper deck club room room at 19:30 No need…",
       "link": "https://blackwatersailingclub.org.uk/event-6868866"
-    },
-    {
-      "title": "Heybridge Basin Gig Race",
-      "date": "2027-02-21",
-      "time": "00:00",
-      "hasTime": false,
-      "excerpt": "The clubhouse is booked to host the Heybridge Gig Race event",
-      "link": "https://blackwatersailingclub.org.uk/event-6849969"
     }
   ]
 }
