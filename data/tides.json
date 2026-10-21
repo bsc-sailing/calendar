@@ -1,20 +1,20 @@
 {
-  "generated": "2026-10-20T09:27:51Z",
+  "generated": "2026-10-21T09:23:41Z",
   "method": "harmonic tide model \u2014 see scripts/tide/TIDES.md",
-  "fit_rms_m": 0.115,
+  "fit_rms_m": 0.114,
   "accuracy_check_against_training_points": {
     "time_rms_minutes": 28.6,
-    "height_rms_m": 0.135,
+    "height_rms_m": 0.134,
     "n_points": 113
   },
   "fitted_from": [
     "programme-2026.csv (113 points)",
-    "tides-official.csv (13 points, station offset +0.0 min, +0.0 m)"
+    "tides-official.csv (14 points, station offset +0.0 min, +0.0 m)"
   ],
-  "n_training_points": 126,
+  "n_training_points": 127,
   "window": [
-    "2026-10-20",
-    "2028-10-18"
+    "2026-10-21",
+    "2028-10-19"
   ],
   "n_real": 8,
   "official_station_offset": {
@@ -24,25 +24,19 @@
     "metres": 0.0,
     "spread_minutes": 0
   },
-  "official_points_used": 13,
+  "official_points_used": 14,
   "official_shown_in_app": true,
   "forecast_note": "Tide from the club's tide table for the BSC pontoon. \u00a9 National Oceanography Centre.",
   "estimate_vs_official": {
-    "n_days": 13,
-    "time_rms_minutes": 22.7,
-    "time_mean_minutes": -10.1,
+    "n_days": 14,
+    "time_rms_minutes": 21.9,
+    "time_mean_minutes": -9.6,
     "time_max_abs_minutes": 44,
-    "height_rms_m": 0.092,
+    "height_rms_m": 0.089,
     "compared_with": "official, offset-adjusted"
   },
   "n_modelled": 722,
   "tides": [
-    {
-      "date": "2026-10-20",
-      "time": "07:40",
-      "height": 2.0,
-      "source": "Forecast"
-    },
     {
       "date": "2026-10-21",
       "time": "09:06",
@@ -81,9 +75,9 @@
     },
     {
       "date": "2026-10-27",
-      "time": "12:57",
+      "time": "13:00",
       "height": 3.6,
-      "source": "Estimated"
+      "source": "Forecast"
     },
     {
       "date": "2026-10-28",
@@ -1351,7 +1345,7 @@
     },
     {
       "date": "2027-05-20",
-      "time": "13:32",
+      "time": "13:31",
       "height": 3.2,
       "source": "Estimated"
     },
@@ -1997,7 +1991,7 @@
     },
     {
       "date": "2027-09-02",
-      "time": "14:06",
+      "time": "14:05",
       "height": 3.7,
       "source": "Estimated"
     },
@@ -2069,7 +2063,7 @@
     },
     {
       "date": "2027-09-14",
-      "time": "12:37",
+      "time": "12:36",
       "height": 2.9,
       "source": "Estimated"
     },
@@ -2381,7 +2375,7 @@
     },
     {
       "date": "2027-11-03",
-      "time": "15:13",
+      "time": "15:12",
       "height": 3.2,
       "source": "Estimated"
     },
@@ -2895,7 +2889,7 @@
     },
     {
       "date": "2028-01-25",
-      "time": "11:58",
+      "time": "11:57",
       "height": 3.3,
       "source": "Estimated"
     },
@@ -2955,7 +2949,7 @@
     },
     {
       "date": "2028-02-04",
-      "time": "05:36",
+      "time": "05:37",
       "height": 2.5,
       "source": "Estimated",
       "alt": {
@@ -3149,7 +3143,7 @@
     },
     {
       "date": "2028-03-06",
-      "time": "08:08",
+      "time": "08:07",
       "height": 2.5,
       "source": "Estimated"
     },
@@ -3549,7 +3543,7 @@
     },
     {
       "date": "2028-05-09",
-      "time": "13:46",
+      "time": "13:45",
       "height": 3.4,
       "source": "Estimated"
     },
@@ -3793,7 +3787,7 @@
     },
     {
       "date": "2028-06-18",
-      "time": "10:56",
+      "time": "10:55",
       "height": 2.1,
       "source": "Estimated"
     },
@@ -4165,7 +4159,7 @@
     },
     {
       "date": "2028-08-17",
-      "time": "10:55",
+      "time": "10:54",
       "height": 2.4,
       "source": "Estimated"
     },
@@ -4425,13 +4419,13 @@
     },
     {
       "date": "2028-09-28",
-      "time": "08:56",
+      "time": "08:55",
       "height": 2.3,
       "source": "Estimated"
     },
     {
       "date": "2028-09-29",
-      "time": "10:20",
+      "time": "10:19",
       "height": 2.4,
       "source": "Estimated"
     },
@@ -4551,6 +4545,12 @@
       "date": "2028-10-18",
       "time": "13:10",
       "height": 3.6,
+      "source": "Estimated"
+    },
+    {
+      "date": "2028-10-19",
+      "time": "13:51",
+      "height": 3.8,
       "source": "Estimated"
     }
   ]
