@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-20T11:48:16Z",
+  "generated": "2026-10-21T11:59:54Z",
   "source": "https://blackwatersailingclub.org.uk/events",
   "events": [
     {
@@ -67,6 +67,14 @@
       "link": "https://blackwatersailingclub.org.uk/event-6856257"
     },
     {
+      "title": "Friday Sailors Christmas Sail and Party",
+      "date": "2026-12-18",
+      "time": "10:00",
+      "hasTime": true,
+      "excerpt": "All members welcome to join the Friday Sailors sail followed by buffet food in the Clubhouse. Please bring some food for the buffet to share. Wear your fancy dress / Christmas jumpers and decorate your boat for a sail.…",
+      "link": "https://blackwatersailingclub.org.uk/event-6885414"
+    },
+    {
       "title": "Tuesday Evening Talk",
       "date": "2027-01-12",
       "time": "18:30",
@@ -89,14 +97,6 @@
       "hasTime": true,
       "excerpt": "RYA Connected Workshop, run by Robbie Bell, East Regional Manager. https://www.rya.org.uk/events/connected-workshop-mid-essex/ The RYA are running a series of face-to-face workshops throughout the East Region as part of…",
       "link": "https://blackwatersailingclub.org.uk/event-6849959"
-    },
-    {
-      "title": "Tuesday Evening Talk",
-      "date": "2027-02-09",
-      "time": "18:30",
-      "hasTime": true,
-      "excerpt": "Tuesday Evening talk for February. Virtual Cruise up the Blackwater from sea to Beeleigh Falls by John Rogers The Osea room bar opens at 18:30 and the talk starts in the main upper deck club room room at 19:30 No need…",
-      "link": "https://blackwatersailingclub.org.uk/event-6868866"
     }
   ]
 }
