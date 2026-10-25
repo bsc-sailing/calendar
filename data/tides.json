@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-24T08:54:31Z",
+  "generated": "2026-10-25T09:11:18Z",
   "method": "harmonic tide model \u2014 see scripts/tide/TIDES.md",
   "fit_rms_m": 0.113,
   "accuracy_check_against_training_points": {
@@ -9,18 +9,18 @@
   },
   "fitted_from": [
     "programme-2026.csv (113 points)",
-    "tides-official.csv (17 points, station offset +0.0 min, +0.0 m)"
+    "tides-official.csv (17 points, station offset +0 min, +0.0 m)"
   ],
   "n_training_points": 130,
   "window": [
-    "2026-10-24",
-    "2028-10-22"
+    "2026-10-25",
+    "2028-10-23"
   ],
-  "n_real": 8,
+  "n_real": 7,
   "official_station_offset": {
     "known": true,
-    "n_overlap": 8,
-    "minutes": 0.0,
+    "n_overlap": 9,
+    "minutes": 0,
     "metres": 0.0,
     "spread_minutes": 0
   },
@@ -35,14 +35,8 @@
     "height_rms_m": 0.08,
     "compared_with": "official, offset-adjusted"
   },
-  "n_modelled": 722,
+  "n_modelled": 723,
   "tides": [
-    {
-      "date": "2026-10-24",
-      "time": "11:56",
-      "height": 3.0,
-      "source": "Programme"
-    },
     {
       "date": "2026-10-25",
       "time": "11:39",
@@ -4551,6 +4545,12 @@
       "date": "2028-10-22",
       "time": "15:53",
       "height": 3.5,
+      "source": "Estimated"
+    },
+    {
+      "date": "2028-10-23",
+      "time": "16:37",
+      "height": 3.3,
       "source": "Estimated"
     }
   ]
