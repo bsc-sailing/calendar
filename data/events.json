@@ -1,15 +1,7 @@
 {
-  "generated": "2026-10-30T13:07:39Z",
+  "generated": "2026-11-01T13:35:05Z",
   "source": "https://blackwatersailingclub.org.uk/events",
   "events": [
-    {
-      "title": "Work Party",
-      "date": "2026-11-01",
-      "time": "09:00",
-      "hasTime": true,
-      "excerpt": "Work Party 9 am to 1 pm Lunch provided Please come and help. For gardening jobs please bring your own tools Jobs to be done: Tidying up the lake area - moving/adding sand Rearranging cruiser tender park & moving unnamed…",
-      "link": "https://blackwatersailingclub.org.uk/event-6868843"
-    },
     {
       "title": "Tuesday Talk: Sailing in Greenland",
       "date": "2026-11-10",
@@ -97,6 +89,14 @@
       "hasTime": true,
       "excerpt": "Tuesday Evening talk for February. Osea Adventures around the World by Darren and Sam Docherty Darren and Sam are back in the UK and will update us on their sailing adventures around the world so far on their Outremer…",
       "link": "https://blackwatersailingclub.org.uk/event-6868866"
+    },
+    {
+      "title": "Heybridge Basin Gig Race",
+      "date": "2027-02-21",
+      "time": "00:00",
+      "hasTime": false,
+      "excerpt": "The clubhouse is booked to host the Heybridge Gig Race event",
+      "link": "https://blackwatersailingclub.org.uk/event-6849969"
     }
   ]
 }
