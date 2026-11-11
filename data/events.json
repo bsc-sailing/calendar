@@ -1,15 +1,7 @@
 {
-  "generated": "2026-11-09T16:35:05Z",
+  "generated": "2026-11-11T14:31:51Z",
   "source": "https://blackwatersailingclub.org.uk/events",
   "events": [
-    {
-      "title": "Talk: A Virtual Cruise up the Blackwater",
-      "date": "2026-11-10",
-      "time": "18:30",
-      "hasTime": true,
-      "excerpt": "A Virtual Cruise Up the Blackwater From the Sea to Beeleigh Falls by John Rogers Join us for a fascinating virtual cruise along the River Blackwater, from the Buxey Sands to Beeleigh Falls, exploring its history,…",
-      "link": "https://blackwatersailingclub.org.uk/event-6868868"
-    },
     {
       "title": "EAMA (East Anglian Maritime Awards) Prize Giving",
       "date": "2026-11-11",
@@ -97,6 +89,14 @@
       "hasTime": false,
       "excerpt": "The clubhouse is booked to host the Heybridge Gig Race event",
       "link": "https://blackwatersailingclub.org.uk/event-6849969"
+    },
+    {
+      "title": "BJRC Dinner",
+      "date": "2027-02-27",
+      "time": "19:00",
+      "hasTime": true,
+      "excerpt": "BJRC Annual Trophy Dinner BJRC members and guests only For info email bjrcnews2025@gmail.com",
+      "link": "https://blackwatersailingclub.org.uk/event-6849965"
     }
   ]
 }
