@@ -1,15 +1,7 @@
 {
-  "generated": "2026-11-11T14:31:51Z",
+  "generated": "2026-11-12T15:24:28Z",
   "source": "https://blackwatersailingclub.org.uk/events",
   "events": [
-    {
-      "title": "EAMA (East Anglian Maritime Awards) Prize Giving",
-      "date": "2026-11-11",
-      "time": "18:30",
-      "hasTime": true,
-      "excerpt": "By invitation only. A celebration of the achievements and ambitions of young peple in or around boats, on water or ashore, across Norfolk, Suffolk and Essex.",
-      "link": "https://blackwatersailingclub.org.uk/event-6543473"
-    },
     {
       "title": "Cadet Laying Up Supper 2026",
       "date": "2026-11-14",
@@ -97,6 +89,14 @@
       "hasTime": true,
       "excerpt": "BJRC Annual Trophy Dinner BJRC members and guests only For info email bjrcnews2025@gmail.com",
       "link": "https://blackwatersailingclub.org.uk/event-6849965"
+    },
+    {
+      "title": "Maldon Joint River Safety Meeting",
+      "date": "2027-03-02",
+      "time": "19:30",
+      "hasTime": true,
+      "excerpt": "MALDON ANNUAL JOINT USERS AND RIVER SAFETY MEETING TUESDAY, 2 MARCH 2026 – 7.30PM Maldon Harbour Improvement Commisioners (MHIC) host this event. Everyone interested in safety matters relating to the River Blackwater is…",
+      "link": "https://blackwatersailingclub.org.uk/event-6804843"
     }
   ]
 }
