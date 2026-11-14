@@ -1,7 +1,15 @@
 {
-  "generated": "2026-11-12T15:24:28Z",
+  "generated": "2026-11-14T13:38:39Z",
   "source": "https://blackwatersailingclub.org.uk/events",
   "events": [
+    {
+      "title": "420 Race Coaching with Luca",
+      "date": "2026-11-14",
+      "time": "09:00",
+      "hasTime": true,
+      "excerpt": "420 Race Coaching with Luca The dates are 14th November Both helm and crew need to register separately, and you must indicate on the form with whom you are sailing. If cadets will need to sort out their own pairings,…",
+      "link": "https://blackwatersailingclub.org.uk/event-6915005"
+    },
     {
       "title": "Cadet Laying Up Supper 2026",
       "date": "2026-11-14",
@@ -89,14 +97,6 @@
       "hasTime": true,
       "excerpt": "BJRC Annual Trophy Dinner BJRC members and guests only For info email bjrcnews2025@gmail.com",
       "link": "https://blackwatersailingclub.org.uk/event-6849965"
-    },
-    {
-      "title": "Maldon Joint River Safety Meeting",
-      "date": "2027-03-02",
-      "time": "19:30",
-      "hasTime": true,
-      "excerpt": "MALDON ANNUAL JOINT USERS AND RIVER SAFETY MEETING TUESDAY, 2 MARCH 2026 – 7.30PM Maldon Harbour Improvement Commisioners (MHIC) host this event. Everyone interested in safety matters relating to the River Blackwater is…",
-      "link": "https://blackwatersailingclub.org.uk/event-6804843"
     }
   ]
 }
