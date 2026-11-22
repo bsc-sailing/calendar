@@ -1,15 +1,7 @@
 {
-  "generated": "2026-11-15T14:03:58Z",
+  "generated": "2026-11-22T14:42:15Z",
   "source": "https://blackwatersailingclub.org.uk/events",
   "events": [
-    {
-      "title": "RYA First Aid course",
-      "date": "2026-11-21",
-      "time": "09:00",
-      "hasTime": true,
-      "excerpt": "This 1 day RYA First Aid Course for members provides the essential skills needed to confidently deliver first aid in a boating environment. The course explores a range of first aid situations and is ideal for anyone who…",
-      "link": "https://blackwatersailingclub.org.uk/event-6884534"
-    },
     {
       "title": "Lake exclusive use by Chelmsford Radio YC",
       "date": "2026-11-22",
@@ -97,6 +89,14 @@
       "hasTime": true,
       "excerpt": "Sailing Single-handed to Greenland, via the Orkneys, Faroes & Iceland by Alan Wilson Come along to the first talk of the season. Alan Wilson will talk about his journey sailing single-handed from Tollesbury to Greenland…",
       "link": "https://blackwatersailingclub.org.uk/event-6560143"
+    },
+    {
+      "title": "Tuesday Talk: RIB safety",
+      "date": "2027-03-23",
+      "time": "18:30",
+      "hasTime": true,
+      "excerpt": "Important RIB safety talk for Drivers and Crew of Rescue boats - Rob Haigh and Alan Coday The Osea room bar opens at 18:30 and the talk starts in the main upper deck club room room at 19:30 No need to book, just turn…",
+      "link": "https://blackwatersailingclub.org.uk/event-6908633"
     }
   ]
 }
